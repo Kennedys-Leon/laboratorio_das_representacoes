@@ -1,0 +1,209 @@
+{
+  "source": "gauss-ef03ma09-partes-iguais.v1.json",
+  "rounds": [
+    {
+      "contractVersion": 1,
+      "gameId": "laboratorio-das-representacoes",
+      "lessonId": "gauss-ef03ma09-partes-iguais",
+      "lessonVersion": 1,
+      "phaseId": "dividir-em-partes-iguais",
+      "exerciseId": "uma-de-duas",
+      "schoolYear": 3,
+      "skillId": "EF03MA09",
+      "bnccCodes": [
+        "EF03MA09"
+      ],
+      "practiceMode": "free_practice",
+      "prompt": "Pinte uma das duas partes do círculo clicando nela.",
+      "accessibleDescription": "Círculo dividido em duas partes iguais, inicialmente sem pintura. Escolha uma parte para pintar.",
+      "response": {
+        "kind": "choice",
+        "choices": [
+          "1/2",
+          "1/3",
+          "2/2",
+          "2/1"
+        ]
+      },
+      "round": {
+        "kind": "fraction_parts",
+        "equalParts": 2,
+        "markedParts": [
+          1
+        ],
+        "shape": "circle",
+        "answerPrompt": "Muito bem! Qual fração representa a parte do círculo que você pintou?"
+      },
+      "demoFeedback": {
+        "1/3": {
+          "reason": "O número de baixo deve contar todas as partes iguais do todo. Conte-as novamente.",
+          "reviewStepId": "partes-do-todo",
+          "revealAnswer": false
+        },
+        "2/2": {
+          "reason": "O número de cima conta só as partes marcadas. Confira quantas foram escolhidas.",
+          "reviewStepId": "partes-do-todo",
+          "revealAnswer": false
+        },
+        "2/1": {
+          "reason": "Confira a ordem da fração: em cima fica a quantidade marcada; embaixo, o total de partes iguais.",
+          "reviewStepId": "partes-do-todo",
+          "revealAnswer": false
+        }
+      }
+    },
+    {
+      "contractVersion": 1,
+      "gameId": "laboratorio-das-representacoes",
+      "lessonId": "gauss-ef03ma09-partes-iguais",
+      "lessonVersion": 1,
+      "phaseId": "dividir-em-partes-iguais",
+      "exerciseId": "uma-de-quatro",
+      "schoolYear": 3,
+      "skillId": "EF03MA09",
+      "bnccCodes": [
+        "EF03MA09"
+      ],
+      "practiceMode": "free_practice",
+      "prompt": "Pinte três das quatro partes do quadrado clicando nelas.",
+      "accessibleDescription": "Quadrado dividido em quatro partes iguais, inicialmente sem pintura. Escolha três partes para pintar.",
+      "response": {
+        "kind": "choice",
+        "choices": [
+          "1/2",
+          "1/4",
+          "4/4",
+          "3/4"
+        ]
+      },
+      "round": {
+        "kind": "fraction_parts",
+        "equalParts": 4,
+        "markedParts": [
+          0,
+          1,
+          2
+        ],
+        "shape": "square",
+        "answerPrompt": "Você pintou três partes de quatro. Qual fração representa a parte pintada?"
+      },
+      "demoFeedback": {
+        "1/2": {
+          "reason": "O quadrado tem quatro partes iguais no total. Conte-as para escolher o número de baixo.",
+          "reviewStepId": "partes-do-todo",
+          "revealAnswer": false
+        },
+        "1/4": {
+          "reason": "Você pintou três partes, não apenas uma. Conte as partes pintadas para escolher o número de cima.",
+          "reviewStepId": "partes-do-todo",
+          "revealAnswer": false
+        },
+        "4/4": {
+          "reason": "Uma das quatro partes continua sem pintura. Conte só as partes que você pintou.",
+          "reviewStepId": "partes-do-todo",
+          "revealAnswer": false
+        }
+      }
+    },
+    {
+      "contractVersion": 1,
+      "gameId": "laboratorio-das-representacoes",
+      "lessonId": "gauss-ef03ma09-partes-iguais",
+      "lessonVersion": 1,
+      "phaseId": "dividir-em-partes-iguais",
+      "exerciseId": "metade-de-oito",
+      "schoolYear": 3,
+      "skillId": "EF03MA09",
+      "bnccCodes": [
+        "EF03MA09"
+      ],
+      "practiceMode": "free_practice",
+      "prompt": "Desenhe dois contornos: cada um deve cercar quatro maçãs.",
+      "accessibleDescription": "Oito maçãs sem grupos. Desenhe dois contornos, cada um envolvendo quatro maçãs.",
+      "response": {
+        "kind": "choice",
+        "choices": [
+          "1/2",
+          "1/3",
+          "1/4",
+          "2/2"
+        ]
+      },
+      "round": {
+        "kind": "fraction_collection",
+        "objectCount": 8,
+        "equalGroups": 2,
+        "requestedGroups": 1,
+        "objectStyle": "apple",
+        "answerPrompt": "Você formou dois grupos iguais. Que fração da coleção representa um grupo de maçãs?"
+      },
+      "demoFeedback": {
+        "1/3": {
+          "reason": "Você formou dois grupos iguais. O número de baixo indica quantos grupos há no total.",
+          "reviewStepId": "repartir-colecao",
+          "revealAnswer": false
+        },
+        "1/4": {
+          "reason": "Há dois grupos iguais, não quatro. Conte os grupos completos.",
+          "reviewStepId": "repartir-colecao",
+          "revealAnswer": false
+        },
+        "2/2": {
+          "reason": "Um grupo é apenas uma parte da coleção, não a coleção toda.",
+          "reviewStepId": "repartir-colecao",
+          "revealAnswer": false
+        }
+      }
+    },
+    {
+      "contractVersion": 1,
+      "gameId": "laboratorio-das-representacoes",
+      "lessonId": "gauss-ef03ma09-partes-iguais",
+      "lessonVersion": 1,
+      "phaseId": "dividir-em-partes-iguais",
+      "exerciseId": "quarta-parte-de-doze",
+      "schoolYear": 3,
+      "skillId": "EF03MA09",
+      "bnccCodes": [
+        "EF03MA09"
+      ],
+      "practiceMode": "free_practice",
+      "prompt": "Desenhe quatro contornos: cada um deve cercar três bananas.",
+      "accessibleDescription": "Doze bananas sem grupos. Desenhe quatro contornos, cada um envolvendo três bananas.",
+      "response": {
+        "kind": "choice",
+        "choices": [
+          "1/2",
+          "1/3",
+          "1/4",
+          "4/4"
+        ]
+      },
+      "round": {
+        "kind": "fraction_collection",
+        "objectCount": 12,
+        "equalGroups": 4,
+        "requestedGroups": 1,
+        "objectStyle": "banana",
+        "answerPrompt": "Você formou quatro grupos iguais. Que fração da coleção representa um grupo de bananas?"
+      },
+      "demoFeedback": {
+        "1/2": {
+          "reason": "Metade corresponde a um de dois grupos iguais. Você formou quatro grupos.",
+          "reviewStepId": "repartir-colecao",
+          "revealAnswer": false
+        },
+        "1/3": {
+          "reason": "Três é a quantidade de bananas em um grupo; o número de baixo indica quantos grupos iguais foram formados.",
+          "reviewStepId": "repartir-colecao",
+          "revealAnswer": false
+        },
+        "4/4": {
+          "reason": "Quatro de quatro representa a coleção inteira. A pergunta pede apenas um grupo.",
+          "reviewStepId": "repartir-colecao",
+          "revealAnswer": false
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "turn_frames": 60,
+  "turn_fps": 60,
+  "frame_size": [
+    128,
+    152
+  ],
+  "columns": 10,
+  "ground_y": 150,
+  "silhouette_height": 132,
+  "method": "premultiplied-alpha bidirectional optical flow between 8 key poses; feet rendered by runtime rig",
+  "walk": "rigid original paws, articulated upper legs, world-space support"
+}
