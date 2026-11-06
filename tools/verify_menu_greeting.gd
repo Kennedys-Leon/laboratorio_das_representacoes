@@ -20,9 +20,10 @@ func verify() -> void:
 			await process_frame
 		var bubble: Control = scene.menu_speech
 		var tail: Control = scene.menu_speech_tail
-		assert(bubble.size.y < 220, "Greeting grew beyond its intended height")
+		assert(bubble.size.y < 320, "Greeting grew beyond the space above the cat")
+		assert(bubble.size.y + 1.0 >= bubble.get_combined_minimum_size().y,
+			"Greeting text does not fit inside the ornate bubble")
 		assert(absf(bubble.position.x + bubble.size.x * bubble.scale.x * 0.5 - 120.0) < 0.1)
-		assert(absf(tail.position.x + tail.size.x * tail.tip_fraction - 120.0) < 0.1)
-		assert(absf(tail.position.y - (bubble.position.y + bubble.size.y * bubble.scale.y - 1.5)) < 0.1)
-	print("PASS: all greetings fit, bubble and tail centered on the cat")
+		assert(not tail.visible, "Old triangle is visible over the integrated bubble tail")
+	print("PASS: all greetings fit in the ornate bubble without duplicate tails")
 	quit()

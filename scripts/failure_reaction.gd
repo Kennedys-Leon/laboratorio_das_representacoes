@@ -56,6 +56,10 @@ func _draw() -> void:
 			draw_polyline(shape,INK,1.3,true)
 			draw_polyline(shine,Color("f2beff"),1,true)
 			_ellipse(left[-1]+Vector2(1.5,0),Vector2(2.7,3.4)*flow,Color("ce7bf6"))
+	# The liquid climbs inside the fixed glass before the rounded foam crests
+	# over its mouth. Keep the fill inside the transparent inner wall so the
+	# rim and side highlights remain connected to the original cup artwork.
+	_draw_rising_liquid()
 	# Keep the rounded, cartoon foam. Its lobes share the glass's fixed rim,
 	# so the cup, foam and streams cannot drift apart as the cat reacts.
 	var foam := smoothstep(1.02, 1.92, time) * (1.0 - 0.22 * smoothstep(3.55, 4.0, time))
@@ -109,6 +113,26 @@ func _draw() -> void:
 				for ray in 3:
 					var v := Vector2.from_angle(-PI*0.8+ray*0.3*PI)
 					draw_line(Vector2(center_x,198)+v*(9+ring*8),Vector2(center_x,198)+v*(13+ring*10),Color(1,0.9,0.65,(1-ring)*0.8),1.5,true)
+
+func _draw_rising_liquid() -> void:
+	if time < 0.72: return
+	var rise := smoothstep(0.72, 2.43, time)
+	var surface := lerpf(178.0, 158.5, rise)
+	var points := PackedVector2Array()
+	var colors := PackedColorArray()
+	var crest := PackedVector2Array()
+	for i in 13:
+		var x := 93.0 + i * (44.0 / 12.0)
+		var y := surface + sin(i * 0.85 - time * 4.1) * 0.85 * rise
+		points.append(Vector2(x, y))
+		colors.append(Color("d280f5"))
+		crest.append(Vector2(x, y + 0.6))
+	points.append(Vector2(137, 182))
+	points.append(Vector2(93, 182))
+	colors.append(Color("982be3"))
+	colors.append(Color("982be3"))
+	draw_polygon(points, colors)
+	draw_polyline(crest, Color("f0b9ff"), 1.2, true)
 
 func _draw_foam(growth: float) -> void:
 	var lobes: Array[Vector3] = [

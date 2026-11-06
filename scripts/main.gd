@@ -171,13 +171,13 @@ func _show_menu_greeting() -> void:
 	var phrases := MENU_GREETINGS.duplicate()
 	if not student_name.is_empty():
 		phrases.append("Olá %s vamos aprender hoje?" % student_name)
-	menu_speech_label.size.x = 216.0
+	menu_speech_label.size.x = 274.0
 	menu_speech_label.text = phrases[greeting_rng.randi_range(0, phrases.size() - 1)]
 	menu_speech.scale = MENU_SPEECH_SCALE
 	menu_speech.pivot_offset = Vector2.ZERO
 	menu_speech.modulate.a = 1.0
 	menu_speech.show()
-	menu_speech_tail.show()
+	menu_speech_tail.hide()
 	menu_speech_pop.clear()
 	call_deferred("_align_menu_greeting")
 
@@ -185,7 +185,7 @@ func _show_menu_greeting() -> void:
 func _align_menu_greeting() -> void:
 	await get_tree().process_frame
 	var center := 120.0
-	menu_speech.size = Vector2(260, maxf(136, menu_speech.get_combined_minimum_size().y))
+	menu_speech.size = Vector2(360, maxf(230, menu_speech.get_combined_minimum_size().y))
 	menu_speech.position = Vector2(center - menu_speech.size.x * MENU_SPEECH_SCALE.x * 0.5, -24.0 - menu_speech.size.y * MENU_SPEECH_SCALE.y)
 	menu_speech_tail.size = Vector2(48, 32)
 	menu_speech_tail.position = Vector2(center + 8, menu_speech.position.y + menu_speech.size.y * MENU_SPEECH_SCALE.y - 1.5)
@@ -213,7 +213,7 @@ func _show_walk_speech() -> void:
 	if walk_speech_tween != null and walk_speech_tween.is_running():
 		walk_speech_tween.kill()
 	walk_speech.show()
-	walk_speech_tail.show()
+	walk_speech_tail.hide()
 	walk_speech.modulate.a = 0.0
 	walk_speech_tail.modulate.a = 0.0
 	walk_speech.scale = Vector2(0.92, 0.92)
@@ -261,10 +261,10 @@ func _update_layout() -> void:
 	cat_platform.offset_top = -5.0 if compact else -7.0
 	cat_platform.offset_bottom = 7.0 if compact else 5.0
 	cat_speech.anchor_right = 0.62 if compact else 1.0 if not narrow else 0.66
-	question_label.add_theme_font_size_override("font_size", 18 if compact else 23)
+	question_label.add_theme_font_size_override("font_size", 16 if compact else 20)
 	find_child("HowText", true, false).add_theme_font_size_override("font_size", 19 if compact else 21)
 	cat_speech.offset_top = 10.0 if narrow else 85.0
-	cat_speech.offset_bottom = 200.0 if compact else 210.0 if narrow else 290.0
+	cat_speech.offset_bottom = 250.0 if compact else 255.0 if narrow else 330.0
 	speech_tail.anchor_left = 0.58 if compact else 0.62 if narrow else 0.42
 	speech_tail.anchor_right = speech_tail.anchor_left
 	speech_tail.offset_left = -19.0 if not narrow else 0.0
@@ -611,7 +611,7 @@ func _cancel_speech_transition() -> void:
 		speech_tween.kill()
 	cat_speech.scale = Vector2.ONE
 	cat_speech.modulate.a = 1.0
-	speech_tail.visible = true
+	speech_tail.visible = false
 	speech_tail.modulate.a = 1.0
 	speech_pop.clear()
 
@@ -660,7 +660,7 @@ func _finish_rewind_pop(generation: int, to_drawing: bool) -> void:
 	speech_tween.tween_property(cat_speech, "scale", Vector2.ONE, 0.11).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	speech_tween.tween_callback(func():
 		if generation == speech_generation:
-			speech_tail.show())
+			speech_tail.hide())
 
 
 func _finish_speech_pop(generation: int) -> void:
@@ -677,7 +677,7 @@ func _finish_speech_pop(generation: int) -> void:
 
 func _finish_speech_open(generation: int) -> void:
 	if generation == speech_generation and stage_complete:
-		speech_tail.visible = true
+		speech_tail.visible = false
 
 
 func _on_diagram_selection_changed(count: int) -> void:

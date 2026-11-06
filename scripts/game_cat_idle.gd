@@ -37,6 +37,7 @@ var burst: Control
 var praise: TextureRect
 var failure_beaker: TextureRect
 var celebration_beaker: TextureRect
+var fixed_mixing_beaker: TextureRect
 @onready var failure_effect: Control = $FailureReaction
 @onready var retry_message: Control = $RetryMessage
 var failing := false
@@ -71,6 +72,19 @@ func _ready() -> void:
 		assert(frame != null, "Missing potion animation frame %d" % (index + 1))
 		frames.append(frame)
 		beaker_frames.append(load("res://assets/cat_animation/potion_mix/beaker_%02d.png" % (index + 1)))
+	for layer in [beaker, next_beaker]:
+		var liquid_material := ShaderMaterial.new()
+		liquid_material.shader = preload("res://shaders/beaker_liquid_mask.gdshader")
+		layer.material = liquid_material
+	fixed_mixing_beaker = TextureRect.new()
+	fixed_mixing_beaker.texture = beaker_frames[6]
+	fixed_mixing_beaker.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	fixed_mixing_beaker.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	fixed_mixing_beaker.size = beaker.size
+	fixed_mixing_beaker.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fixed_mixing_beaker.z_index = 2
+	add_child(fixed_mixing_beaker)
+	fixed_mixing_beaker.hide()
 	burst = load("res://scripts/success_burst.gd").new()
 	burst.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	burst.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -141,7 +155,10 @@ func start_idle() -> void:
 	next_sprite.show()
 	beaker.show()
 	next_beaker.show()
-	beaker_rim.show()
+	beaker_rim.hide()
+	fixed_mixing_beaker.hide()
+	for layer in [beaker, next_beaker]:
+		layer.material.set_shader_parameter("liquid_only", false)
 	elapsed = 0.0
 	pose_elapsed = 0.0
 	pose_step = 0
@@ -166,6 +183,7 @@ func start_idle() -> void:
 			layer.position = Vector2.ZERO
 			layer.rotation = 0.0
 		beaker_rim.position = Vector2.ZERO
+		fixed_mixing_beaker.position = Vector2.ZERO
 		standing_paws.position.x = 60.0
 		table_flasks.hide()
 
@@ -200,6 +218,15 @@ func _process(delta: float) -> void:
 	var blend := clampf((progress - 0.52) / 0.36, 0.0, 1.0)
 	next_sprite.modulate.a = blend * blend * (3.0 - 2.0 * blend)
 	next_beaker.modulate.a = next_sprite.modulate.a
+	# Keep the complete glass steady while the liquid inside follows both poses.
+	# Masking the changing frames prevents their mismatched side outlines from
+	# ghosting through the cup's fixed silhouette.
+	beaker.visible = true
+	next_beaker.visible = true
+	beaker_rim.visible = stirring
+	fixed_mixing_beaker.visible = stirring
+	for layer in [beaker, next_beaker]:
+		layer.material.set_shader_parameter("liquid_only", stirring)
 	# The bottles settle onto the tabletop with the same in-between blend,
 	# then remain fixed while the cat's animated layers continue to sway.
 	table_flasks.modulate.a = 1.0 if stirring or pose_index >= 5 else next_sprite.modulate.a if next_index >= 5 else 0.0
@@ -211,11 +238,13 @@ func _process(delta: float) -> void:
 	next_sprite.position.y = sway
 	# The whole central vessel rocks gently under the spoon. Its complete rim
 	# moves with the glass, while the two smaller tabletop flasks stay fixed.
-	var vessel_motion := Vector2(sin(elapsed * TAU / 1.45) * 0.85,
-		sin(elapsed * TAU / 1.65 + 0.4) * 0.55) if stirring else Vector2.ZERO
+	var vessel_phase := elapsed * TAU / 1.8
+	var vessel_motion := Vector2(sin(vessel_phase) * 0.57,
+		sin(vessel_phase + 0.4) * 0.29) if stirring else Vector2.ZERO
 	beaker.position = vessel_motion
 	next_beaker.position = vessel_motion
 	beaker_rim.position = vessel_motion
+	fixed_mixing_beaker.position = vessel_motion
 
 
 func _pose_duration() -> float:
@@ -242,6 +271,9 @@ func celebrate() -> void:
 	praise.hide()
 	celebration_beaker.hide()
 	beaker_rim.hide()
+	fixed_mixing_beaker.hide()
+	for layer in [beaker, next_beaker]:
+		layer.material.set_shader_parameter("liquid_only", false)
 	beaker.modulate.a = 1.0
 	beaker.position = Vector2.ZERO
 	next_beaker.position = Vector2.ZERO
@@ -309,6 +341,7 @@ func fail_attempt() -> void:
 	beaker.hide()
 	next_beaker.hide()
 	beaker_rim.hide()
+	fixed_mixing_beaker.hide()
 	celebration_beaker.hide()
 	failure_effect.hide()
 	potion_bubbles.hide()

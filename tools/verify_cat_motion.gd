@@ -22,7 +22,7 @@ func verify() -> void:
 	assert(not walk_speech.visible and not walk_speech_tail.visible,
 		"Walking bubble appears before the cat walks")
 	assert(scene.find_child("WalkSpeechLabel", true, false).text ==
-		"Vamos, é hora de representar!!!", "Walking dialogue changed")
+		"Hora de representar!!!", "Walking dialogue changed")
 	play.pressed.emit()
 	var turn_seen := {}
 	var support_samples := 0
@@ -48,7 +48,7 @@ func verify() -> void:
 					assert(absf(turn_feet[paw].x - last_turn_feet[paw].x) < 1.0, "Rising paw jumped")
 			last_turn_feet = turn_feet
 		elif cat.state == "walk":
-			assert(walk_speech.visible and walk_speech_tail.visible,
+			assert(walk_speech.visible and not walk_speech_tail.visible,
 				"Walking bubble did not appear with the first step")
 			assert(not cat.paw_overlay.visible, "Rising paw layer remained over the walk")
 			var body_pose: Vector2 = cat.walk_rig.call("body_pose")

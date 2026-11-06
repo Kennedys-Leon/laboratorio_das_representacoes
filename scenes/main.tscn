@@ -34,14 +34,33 @@
 [ext_resource type="Script" path="res://scripts/how_art_scene.gd" id="28_how_scene"]
 [ext_resource type="Shader" path="res://shaders/how_floor_blur.gdshader" id="29_how_floor_blur"]
 [ext_resource type="Texture2D" path="res://assets/pergaminho-fracoes.png" id="30_parchment"]
+[ext_resource type="Texture2D" path="res://assets/balao-fala-magico.png" id="31_magic_speech"]
+
+[sub_resource type="StyleBoxTexture" id="MagicSpeechLarge"]
+texture = ExtResource("31_magic_speech")
+content_margin_left = 43.0
+content_margin_top = 59.0
+content_margin_right = 43.0
+content_margin_bottom = 54.0
+
+[sub_resource type="StyleBoxTexture" id="MagicSpeechSmall"]
+texture = ExtResource("31_magic_speech")
+content_margin_left = 24.0
+content_margin_top = 43.0
+content_margin_right = 24.0
+content_margin_bottom = 43.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_how_floor_blur"]
 shader = ExtResource("29_how_floor_blur")
 
+[sub_resource type="AtlasTexture" id="ParchmentFrame"]
+atlas = ExtResource("30_parchment")
+region = Rect2(8, 91, 1238, 1132)
+
 [sub_resource type="StyleBoxTexture" id="ParchmentCard"]
-texture = ExtResource("30_parchment")
+texture = SubResource("ParchmentFrame")
 content_margin_left = 30.0
-content_margin_top = 78.0
+content_margin_top = 41.0
 content_margin_right = 30.0
 content_margin_bottom = 42.0
 
@@ -2476,18 +2495,18 @@ script = ExtResource("26_walk_speech_tail")
 [node name="WalkSpeech" type="PanelContainer" parent="MenuLayer/MenuCat/CatWalkRig"]
 visible = false
 show_behind_parent = true
-offset_left = -285.0
-offset_top = -125.0
-offset_right = -15.0
-offset_bottom = -12.0
+offset_left = -45.0
+offset_top = -190.0
+offset_right = 225.0
+offset_bottom = 10.0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("UISpeech")
+theme_override_styles/panel = SubResource("MagicSpeechLarge")
 
 [node name="WalkSpeechLabel" type="Label" parent="MenuLayer/MenuCat/CatWalkRig/WalkSpeech"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12941177, 0.09019608, 0.21568628, 1)
 theme_override_font_sizes/font_size = 18
-text = "Vamos, é hora de representar!!!"
+text = "Hora de representar!!!"
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
@@ -2521,7 +2540,7 @@ offset_top = -160.0
 offset_right = 240.0
 offset_bottom = -24.0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("UISpeech")
+theme_override_styles/panel = SubResource("MagicSpeechLarge")
 
 [node name="MenuSpeechLabel" type="Label" parent="MenuLayer/MenuCat/MenuSpeech"]
 layout_mode = 2
@@ -2534,6 +2553,7 @@ autowrap_mode = 3
 mouse_filter = 2
 
 [node name="MenuSpeechTail" type="Control" parent="MenuLayer/MenuCat"]
+visible = false
 layout_mode = 0
 offset_left = 96.0
 offset_top = -42.0
@@ -2600,14 +2620,14 @@ size_flags_horizontal = 3
 theme_override_constants/separation = 18
 
 [node name="GameCard" type="PanelContainer" parent="GameLayer/Scroll/Center/Page/GameRow" unique_id=678883410]
-custom_minimum_size = Vector2(0, 640)
+custom_minimum_size = Vector2(0, 650)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("ParchmentCard")
 
 [node name="GameContent" type="VBoxContainer" parent="GameLayer/Scroll/Center/Page/GameRow/GameCard" unique_id=1842910060]
 layout_mode = 2
-theme_override_constants/separation = 5
+theme_override_constants/separation = 8
 
 [node name="GameHeader" type="PanelContainer" parent="GameLayer/Scroll/Center/Page/GameRow/GameCard/GameContent" unique_id=596133821]
 layout_mode = 2
@@ -2916,7 +2936,7 @@ layout_mode = 1
 anchor_right = 1.0
 offset_top = 105.0
 offset_bottom = 325.0
-theme_override_styles/panel = SubResource("UISpeech")
+theme_override_styles/panel = SubResource("MagicSpeechLarge")
 
 [node name="QuestionLabel" type="Label" parent="GameLayer/Scroll/Center/Page/GameRow/CatArea/CatSpeech"]
 layout_mode = 2
@@ -2924,10 +2944,12 @@ theme_override_colors/font_color = Color(0.12941177, 0.09019608, 0.21568628, 1)
 theme_override_font_sizes/font_size = 23
 text = "Pinte uma das duas partes do círculo clicando nela."
 autowrap_mode = 3
+horizontal_alignment = 1
 vertical_alignment = 1
 
 
 [node name="SpeechTail" type="Control" parent="GameLayer/Scroll/Center/Page/GameRow/CatArea"]
+visible = false
 layout_mode = 0
 offset_left = 120.0
 offset_top = 324.0
@@ -3278,6 +3300,7 @@ stretch_mode = 4
 flip_h = true
 
 [node name="HowSpeechTail" type="Control" parent="HowLayer/HowArtLayer"]
+visible = false
 offset_left = 921.0
 offset_top = 382.0
 offset_right = 950.0
@@ -3292,7 +3315,7 @@ offset_top = 330.0
 offset_right = 1026.0
 offset_bottom = 387.0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_how_speech")
+theme_override_styles/panel = SubResource("MagicSpeechSmall")
 
 [node name="HowSpeechLabel" type="Label" parent="HowLayer/HowArtLayer/HowSpeech"]
 layout_mode = 2

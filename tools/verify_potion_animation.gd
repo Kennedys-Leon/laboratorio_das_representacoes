@@ -78,6 +78,10 @@ func verify() -> void:
 			assert(fixed.visible and fixed.modulate.a == 1.0 and fixed.position == flask_position,
 				"The table bottles moved during stirring")
 			assert(cat.beaker_rim.visible, "The complete glass edge disappeared during stirring")
+			assert(cat.fixed_mixing_beaker.visible and cat.fixed_mixing_beaker.position == cat.beaker.position,
+				"The fixed glass no longer follows the liquid")
+			assert(cat.beaker.texture == cat.beaker_frames[cat.pose_index] and cat.next_beaker.visible,
+				"The potion stopped changing with the stirring poses")
 			vessel_moved = vessel_moved or cat.beaker.position.length() > 0.25
 		blended = blended or (cat.next_sprite.modulate.a > 0.0 and cat.next_sprite.modulate.a < 1.0)
 		if cat.pose_index != previous:
