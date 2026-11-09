@@ -6,8 +6,9 @@ extends Control
 		time = value
 		queue_redraw()
 const FLASKS = preload("res://assets/cat_animation/potion_mix/table_flasks.png")
+const LIQUID_ART = preload("res://assets/cat_animation/potion_mix/celebration_beaker.png")
 const INK := Color("38224c")
-const PURPLE := Color("b149ee")
+const PURPLE := Color("9d28f4")
 const IMPACTS := [1.50, 1.58]
 const GLASS_WIDTH := 48.6
 const GLASS_HEIGHT := 58.1
@@ -19,6 +20,15 @@ func _ellipse(center: Vector2, radius: Vector2, color: Color) -> void:
 	draw_set_transform(center, 0.0, radius / 32.0)
 	draw_circle(Vector2.ZERO,32,color,true,-1,true)
 	draw_set_transform(Vector2.ZERO)
+
+func _liquid_lobe(center: Vector2, radius: Vector2) -> void:
+	var points := PackedVector2Array()
+	var colors := PackedColorArray()
+	for i in 40:
+		var direction := Vector2.from_angle(float(i) * TAU / 40.0)
+		points.append(center + direction * radius)
+		colors.append(Color("c054fd").lerp(Color("8b20ed"), (direction.y + 1.0) * 0.5))
+	draw_polygon(points, colors)
 
 func _draw() -> void:
 	if time <= 0: return
@@ -51,18 +61,18 @@ func _draw() -> void:
 			var shape := left.duplicate()
 			right.reverse()
 			shape.append_array(right)
-			draw_colored_polygon(shape,Color("c969f3"))
+			draw_colored_polygon(shape,PURPLE)
 			shape.append(shape[0])
 			draw_polyline(shape,INK,1.3,true)
 			draw_polyline(shine,Color("f2beff"),1,true)
-			_ellipse(left[-1]+Vector2(1.5,0),Vector2(2.7,3.4)*flow,Color("ce7bf6"))
+			_ellipse(left[-1]+Vector2(1.5,0),Vector2(2.7,3.4)*flow,PURPLE)
 	# The liquid climbs inside the fixed glass before the rounded foam crests
 	# over its mouth. Keep the fill inside the transparent inner wall so the
 	# rim and side highlights remain connected to the original cup artwork.
 	_draw_rising_liquid()
 	# Keep the rounded, cartoon foam. Its lobes share the glass's fixed rim,
 	# so the cup, foam and streams cannot drift apart as the cat reacts.
-	var foam := smoothstep(1.02, 1.92, time) * (1.0 - 0.22 * smoothstep(3.55, 4.0, time))
+	var foam := smoothstep(1.35, 1.90, time) * (1.0 - 0.22 * smoothstep(3.55, 4.0, time))
 	if foam > 0.01:
 		_draw_foam(foam)
 	# A few drops bounce at the two contact points, without a radial explosion.
@@ -116,22 +126,24 @@ func _draw() -> void:
 
 func _draw_rising_liquid() -> void:
 	if time < 0.72: return
-	var rise := smoothstep(0.72, 2.43, time)
+	var rise := smoothstep(0.72, 1.65, time)
 	var surface := lerpf(178.0, 158.5, rise)
 	var points := PackedVector2Array()
-	var colors := PackedColorArray()
+	var uv := PackedVector2Array()
 	var crest := PackedVector2Array()
 	for i in 13:
-		var x := 93.0 + i * (44.0 / 12.0)
+		var x := 84.0 + i * (61.0 / 12.0)
 		var y := surface + sin(i * 0.85 - time * 4.1) * 0.85 * rise
 		points.append(Vector2(x, y))
-		colors.append(Color("d280f5"))
 		crest.append(Vector2(x, y + 0.6))
-	points.append(Vector2(137, 182))
-	points.append(Vector2(93, 182))
-	colors.append(Color("982be3"))
-	colors.append(Color("982be3"))
-	draw_polygon(points, colors)
+	# Fill the full inner volume, with rounded bottom corners. Sample the
+	# existing potion artwork so the rising liquid keeps its colour and gloss.
+	points.append_array(PackedVector2Array([Vector2(144, 204), Vector2(138, 209),
+		Vector2(91, 209), Vector2(85, 204)]))
+	for point in points:
+		uv.append(Vector2(112.0 + (point.x - 84.0),
+			231.0 + clampf((point.y - surface) / (209.0 - surface), 0.0, 1.0) * 23.0) / LIQUID_ART.get_size())
+	draw_polygon(points, PackedColorArray([Color(1, 1, 1, smoothstep(0.72, 0.95, time))]), uv, LIQUID_ART)
 	draw_polyline(crest, Color("f0b9ff"), 1.2, true)
 
 func _draw_foam(growth: float) -> void:
@@ -164,7 +176,7 @@ func _draw_foam(growth: float) -> void:
 	for side in [-1.0, 1.0]:
 		_ellipse(Vector2(115 + side * 33, 159 + 2.4 * growth), Vector2(2.8, 5.4 * growth), PURPLE)
 	for i in centers.size():
-		_ellipse(centers[i], radii[i], PURPLE)
+		_liquid_lobe(centers[i], radii[i])
 	for i in 7:
 		var center := centers[1 + i] + Vector2(-1.5, -2.0 * growth)
 		_ellipse(center, Vector2(2.0, 0.85) * growth, Color("e8a4ff"))

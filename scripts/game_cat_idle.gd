@@ -76,6 +76,10 @@ func _ready() -> void:
 		var liquid_material := ShaderMaterial.new()
 		liquid_material.shader = preload("res://shaders/beaker_liquid_mask.gdshader")
 		layer.material = liquid_material
+	var rim_material := ShaderMaterial.new()
+	rim_material.shader = preload("res://shaders/beaker_liquid_mask.gdshader")
+	rim_material.set_shader_parameter("glass_only", true)
+	beaker_rim.material = rim_material
 	fixed_mixing_beaker = TextureRect.new()
 	fixed_mixing_beaker.texture = beaker_frames[6]
 	fixed_mixing_beaker.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -239,8 +243,9 @@ func _process(delta: float) -> void:
 	# The whole central vessel rocks gently under the spoon. Its complete rim
 	# moves with the glass, while the two smaller tabletop flasks stay fixed.
 	var vessel_phase := elapsed * TAU / 1.8
-	var vessel_motion := Vector2(sin(vessel_phase) * 0.57,
-		sin(vessel_phase + 0.4) * 0.29) if stirring else Vector2.ZERO
+	# A vessel supported by the wood sways sideways; its base does not bob
+	# through the tabletop. Every glass layer shares the same displacement.
+	var vessel_motion := Vector2(sin(vessel_phase) * 0.45, 0.0) if stirring else Vector2.ZERO
 	beaker.position = vessel_motion
 	next_beaker.position = vessel_motion
 	beaker_rim.position = vessel_motion

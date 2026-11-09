@@ -17,6 +17,10 @@ void fragment() {
 	bool vessel = in_glass && glass_alpha > 0.08;
 	// Foam is wider than the glass mouth and remains in front of it.
 	vessel = vessel || (p.x > 106.0 && p.x < 195.0 && p.y >= 148.0 && p.y < 190.0 && ink.b > 0.6 && ink.b > ink.g * 1.15);
+	// Include the pale rim and dark outline of the baked foam, not just its
+	// purple fill. Otherwise orphan outlines remain above the separate vessel.
+	vec2 foam_point = (p - vec2(146.5, 180.0)) / vec2(40.0, 24.0);
+	vessel = vessel || (reaction_time > 1.1 && dot(foam_point, foam_point) < 1.0);
 	bool prop = vessel;
 	if (foreground != prop) ink.a = 0.0;
 	// Side bottles, shards and spilled liquid now use table-local animation.

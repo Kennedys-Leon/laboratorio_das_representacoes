@@ -9,8 +9,9 @@ const TURN_ATLAS: Texture2D = preload("res://assets/cat_animation/v8/turn-60.png
 const TURN_FRAME_COUNT := 60
 const TURN_FPS := 60.0
 const TURN_SECONDS := 1.0
-const WALK_SPEED := 36.0
-const WALK_ACCELERATION_SECONDS := 0.30
+const WALK_SPEED := 32.0
+const WALK_ACCELERATION_SECONDS := 0.22
+const WALK_SECONDS := 2.6
 
 @onready var sprite: TextureRect = $CatSprite
 @onready var shadow: Panel = $CatShadow
@@ -91,13 +92,15 @@ func _animate_walk() -> void:
 	walk_rig.position = home_position + Vector2(walk_distance, 0)
 	walk_rig.set("distance", walk_distance)
 	shadow.position.x = shadow_home_position.x + walk_distance
+	modulate.a = 1.0 - smoothstep(WALK_SECONDS - 0.22, WALK_SECONDS, elapsed)
 	# The step phase is tied to distance, so the support foot stays fixed on the floor.
-	if walk_rig.position.x >= walk_target_x:
+	if walk_rig.position.x >= walk_target_x or elapsed >= WALK_SECONDS:
 		state = "stopped"
 		walk_finished.emit()
 
 
 func start_idle() -> void:
+	modulate.a = 1.0
 	state = "stopped" if reduced_motion else "idle"
 	frame_index = 0
 	elapsed = 0.0

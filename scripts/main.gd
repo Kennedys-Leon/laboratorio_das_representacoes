@@ -246,10 +246,28 @@ func _update_layout() -> void:
 	menu_cat.offset_right = -140.0 + cat_shift
 	feedback_cat.visible = not narrow
 	menu_content.custom_minimum_size.x = 0.0 if narrow else 615.0
+	var menu_art_width := maxf(280.0, minf(width - 24.0, 430.0))
+	var eyebrow: Label = find_child("Eyebrow", true, false)
+	eyebrow.offset_left = 0.0 if narrow else -20.0
+	eyebrow.offset_right = eyebrow.offset_left + menu_art_width
+	eyebrow.add_theme_font_size_override("font_size", 11 if narrow else 15)
+	var eyebrow_ribbon: TextureRect = eyebrow.get_node("EyebrowRibbon")
+	eyebrow_ribbon.offset_top = -32.0 if narrow else -40.0
+	eyebrow_ribbon.offset_bottom = 32.0 if narrow else 40.0
+	var title_divider: TextureRect = find_child("TitleDivider", true, false)
+	title_divider.offset_left = 25.0 if narrow else 60.0
+	title_divider.offset_right = title_divider.offset_left + (minf(240.0, width - 40.0) if narrow else 265.0)
+	find_child("DemoTag", true, false).custom_minimum_size.x = minf(448.0, width - 24.0)
 	var title: Label = find_child("MenuTitle", true, false)
-	title.add_theme_font_size_override("font_size", 34 if narrow else 53)
+	var title_size := 34 if narrow else 49
+	title.add_theme_font_size_override("font_size", title_size)
+	title.add_theme_constant_override("line_spacing", -8 if narrow else -18)
+	var title_shadow: Label = title.get_node("MenuTitleShadow")
+	title_shadow.text = title.text
+	title_shadow.add_theme_font_size_override("font_size", title_size)
+	title_shadow.add_theme_constant_override("line_spacing", -8 if narrow else -18)
 	for menu_button in [play_button, find_child("HowButton", true, false), find_child("ExitButton", true, false)]:
-		menu_button.custom_minimum_size.x = minf(350.0, width - 40.0)
+		menu_button.custom_minimum_size.x = minf(370.0, width - 40.0)
 	game_row.vertical = narrow
 	game_row.move_child(cat_area, 0 if narrow else 1)
 	cat_area.custom_minimum_size = Vector2(0, 230 if compact else 245) if narrow else Vector2(330, 540)
@@ -300,6 +318,7 @@ func _show_layer(name: String) -> void:
 		retry_timer.stop()
 	current_layer = name
 	game_background.visible = name == "game" or name == "feedback"
+	find_child("MenuBackground", true, false).visible = name == "menu"
 	background_dim.color = Color(0.09, 0.03, 0.17, 0.18 if game_background.visible else 0.38)
 	menu_layer.visible = name == "menu"
 	game_layer.visible = name == "game"

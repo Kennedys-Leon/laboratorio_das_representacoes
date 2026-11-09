@@ -35,6 +35,44 @@
 [ext_resource type="Shader" path="res://shaders/how_floor_blur.gdshader" id="29_how_floor_blur"]
 [ext_resource type="Texture2D" path="res://assets/pergaminho-fracoes.png" id="30_parchment"]
 [ext_resource type="Texture2D" path="res://assets/balao-fala-magico.png" id="31_magic_speech"]
+[ext_resource type="Texture2D" path="res://assets/ui_decor/menu-ribbon-ornate.png" id="32_menu_ribbon"]
+[ext_resource type="Texture2D" path="res://assets/ui_decor/menu-buttons.png" id="33_menu_buttons"]
+[ext_resource type="FontFile" path="res://assets/fonts/LiberationSerif-Bold.ttf" id="41_menu_font"]
+[ext_resource type="FontFile" path="res://assets/fonts/LiberationSerif-Regular.ttf" id="42_menu_font_regular"]
+[ext_resource type="FontFile" path="res://assets/fonts/LiberationSerif-Italic.ttf" id="43_menu_font_italic"]
+[ext_resource type="FontFile" path="res://assets/fonts/NotoSerifDisplay-Bold.ttf" id="44_menu_title_font"]
+[ext_resource type="Texture2D" path="res://assets/ui_decor/menu-footer.svg" id="36_menu_footer"]
+[ext_resource type="Texture2D" path="res://assets/ui_decor/menu-divider.svg" id="37_menu_divider"]
+[ext_resource type="Texture2D" path="res://assets/laboratorio-menu-v2.png" id="38_menu_background"]
+
+[sub_resource type="AtlasTexture" id="MenuButtonGreenArt"]
+atlas = ExtResource("33_menu_buttons")
+region = Rect2(65, 0, 1640, 292)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="MenuButtonHowArt"]
+atlas = ExtResource("33_menu_buttons")
+region = Rect2(65, 299, 1640, 286)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="MenuButtonExitArt"]
+atlas = ExtResource("33_menu_buttons")
+region = Rect2(65, 586, 1640, 286)
+filter_clip = true
+
+[sub_resource type="StyleBoxEmpty" id="MenuButtonClear"]
+
+[sub_resource type="StyleBoxFlat" id="MenuButtonFocus"]
+bg_color = Color(0, 0, 0, 0)
+border_color = Color(1, 0.92, 0.55, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+corner_radius_top_left = 25
+corner_radius_top_right = 25
+corner_radius_bottom_left = 25
+corner_radius_bottom_right = 25
 
 [sub_resource type="StyleBoxTexture" id="MagicSpeechLarge"]
 texture = ExtResource("31_magic_speech")
@@ -42,6 +80,13 @@ content_margin_left = 43.0
 content_margin_top = 59.0
 content_margin_right = 43.0
 content_margin_bottom = 54.0
+
+[sub_resource type="StyleBoxTexture" id="MagicSpeechWalk"]
+texture = ExtResource("31_magic_speech")
+content_margin_left = 36.0
+content_margin_top = 55.0
+content_margin_right = 36.0
+content_margin_bottom = 66.0
 
 [sub_resource type="StyleBoxTexture" id="MagicSpeechSmall"]
 texture = ExtResource("31_magic_speech")
@@ -66,9 +111,9 @@ content_margin_bottom = 42.0
 
 [sub_resource type="StyleBoxEmpty" id="ParchmentHeader"]
 content_margin_left = 12.0
-content_margin_top = 5.0
+content_margin_top = 0.0
 content_margin_right = 12.0
-content_margin_bottom = 5.0
+content_margin_bottom = 10.0
 
 [sub_resource type="StyleBoxFlat" id="ParchmentChoice"]
 bg_color = Color(0.974, 0.947, 0.993, 1)
@@ -2321,6 +2366,15 @@ texture = ExtResource("11_game_background")
 expand_mode = 1
 stretch_mode = 6
 
+[node name="MenuBackground" type="TextureRect" parent="."]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("38_menu_background")
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
 [node name="BackgroundDim" type="ColorRect" parent="." unique_id=1016692139]
 layout_mode = 0
 anchor_right = 1.0
@@ -2355,89 +2409,204 @@ theme_override_constants/separation = 20
 [node name="MenuContent" type="VBoxContainer" parent="MenuLayer/Scroll/Center/Page/MenuRow" unique_id=1182037697]
 custom_minimum_size = Vector2(615, 0)
 layout_mode = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 9
 
-[node name="Eyebrow" type="Label" parent="MenuLayer/Scroll/Center/Page/MenuRow/MenuContent" unique_id=80327755]
+[node name="EyebrowRow" type="Control" parent="MenuLayer/Scroll/Center/Page/MenuRow/MenuContent"]
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.64705884, 0.91764706, 0.4745098, 1)
-theme_override_font_sizes/font_size = 16
+mouse_filter = 2
+
+[node name="Eyebrow" type="Label" parent="MenuLayer/Scroll/Center/Page/MenuRow/MenuContent/EyebrowRow" unique_id=80327755]
+offset_left = -20.0
+offset_top = 5.0
+offset_right = 410.0
+offset_bottom = 55.0
+theme_override_colors/font_color = Color(1, 0.934, 0.705, 1)
+theme_override_colors/font_shadow_color = Color(0.12, 0.02, 0.19, 0.9)
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("42_menu_font_regular")
+theme_override_font_sizes/font_size = 15
 text = "PEQUENOS CIENTISTAS, GRANDES DESCOBERTAS"
+horizontal_alignment = 1
+vertical_alignment = 1
 autowrap_mode = 3
+
+[node name="EyebrowRibbon" type="TextureRect" parent="MenuLayer/Scroll/Center/Page/MenuRow/MenuContent/EyebrowRow/Eyebrow"]
+show_behind_parent = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -40.0
+offset_bottom = 40.0
+texture = ExtResource("32_menu_ribbon")
+expand_mode = 1
+stretch_mode = 0
+mouse_filter = 2
 
 [node name="MenuTitle" type="Label" parent="MenuLayer/Scroll/Center/Page/MenuRow/MenuContent" unique_id=865037198]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.98039216, 0.9411765, 1)
-theme_override_colors/font_outline_color = Color(0.105882354, 0.0627451, 0.20784314, 1)
-theme_override_constants/outline_size = 10
+theme_override_colors/font_color = Color(1, 0.957, 0.792, 1)
+theme_override_colors/font_outline_color = Color(0.89, 0.57, 0.22, 1)
+theme_override_constants/outline_size = 2
+theme_override_constants/line_spacing = -18
+theme_override_fonts/font = ExtResource("44_menu_title_font")
 theme_override_font_sizes/font_size = 57
 text = "Laboratório das
 Representações"
 autowrap_mode = 3
 
+[node name="MenuTitleShadow" type="Label" parent="MenuLayer/Scroll/Center/Page/MenuRow/MenuContent/MenuTitle"]
+show_behind_parent = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.16, 0.045, 0.19, 1)
+theme_override_colors/font_outline_color = Color(0.16, 0.045, 0.19, 1)
+theme_override_colors/font_shadow_color = Color(0.035, 0.012, 0.07, 0.8)
+theme_override_constants/outline_size = 8
+theme_override_constants/line_spacing = -18
+theme_override_constants/shadow_offset_x = 4
+theme_override_constants/shadow_offset_y = 5
+theme_override_fonts/font = ExtResource("44_menu_title_font")
+theme_override_font_sizes/font_size = 57
+text = "Laboratório das
+Representações"
+autowrap_mode = 3
+
+[node name="TitleDividerRow" type="Control" parent="MenuLayer/Scroll/Center/Page/MenuRow/MenuContent"]
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="TitleDivider" type="TextureRect" parent="MenuLayer/Scroll/Center/Page/MenuRow/MenuContent/TitleDividerRow"]
+offset_left = 60.0
+offset_top = -14.0
+offset_right = 325.0
+offset_bottom = 24.0
+texture = ExtResource("37_menu_divider")
+expand_mode = 1
+stretch_mode = 0
+mouse_filter = 2
+
 [node name="MenuSubtitle" type="Label" parent="MenuLayer/Scroll/Center/Page/MenuRow/MenuContent" unique_id=738265655]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.98039216, 0.9411765, 1)
+theme_override_colors/font_shadow_color = Color(0.12, 0.04, 0.18, 0.9)
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("43_menu_font_italic")
 theme_override_font_sizes/font_size = 21
 text = "Pinte, separe frutas e descubra frações com o gatinho!"
 autowrap_mode = 3
 
-[node name="PlayButton" type="Button" parent="MenuLayer/Scroll/Center/Page/MenuRow/MenuContent" unique_id=106025830]
-theme_override_colors/font_disabled_color = Color(0.48, 0.42, 0.53, 1)
-custom_minimum_size = Vector2(350, 68)
+[node name="MenuButtons" type="VBoxContainer" parent="MenuLayer/Scroll/Center/Page/MenuRow/MenuContent"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.105882354, 0.0627451, 0.20784314, 1)
-theme_override_colors/font_pressed_color = Color(0.105882354, 0.0627451, 0.20784314, 1)
-theme_override_colors/font_hover_color = Color(0.105882354, 0.0627451, 0.20784314, 1)
-theme_override_font_sizes/font_size = 25
-theme_override_styles/normal = SubResource("UIPrimary")
-theme_override_styles/pressed = SubResource("UIPrimaryHover")
-theme_override_styles/hover = SubResource("UIPrimaryHover")
-theme_override_styles/disabled = SubResource("UIDisabled")
-theme_override_styles/focus = SubResource("StyleBoxFlat_bhscq")
+theme_override_constants/separation = -2
+
+[node name="PlayButton" type="Button" parent="MenuLayer/Scroll/Center/Page/MenuRow/MenuContent/MenuButtons" unique_id=106025830]
+theme_override_colors/font_disabled_color = Color(0.84, 0.84, 0.76, 1)
+custom_minimum_size = Vector2(370, 70)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.96, 0.78, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.96, 0.78, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 0.88, 1)
+theme_override_fonts/font = ExtResource("41_menu_font")
+theme_override_font_sizes/font_size = 27
+theme_override_styles/normal = SubResource("MenuButtonClear")
+theme_override_styles/pressed = SubResource("MenuButtonClear")
+theme_override_styles/hover = SubResource("MenuButtonClear")
+theme_override_styles/disabled = SubResource("MenuButtonClear")
+theme_override_styles/focus = SubResource("MenuButtonFocus")
 text = "Vamos jogar!"
 size_flags_horizontal = 0
 
+[node name="MenuButtonArt" type="TextureRect" parent="MenuLayer/Scroll/Center/Page/MenuRow/MenuContent/MenuButtons/PlayButton"]
+show_behind_parent = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = SubResource("MenuButtonGreenArt")
+expand_mode = 1
+stretch_mode = 0
+mouse_filter = 2
 
-[node name="HowButton" type="Button" parent="MenuLayer/Scroll/Center/Page/MenuRow/MenuContent" unique_id=1681513427]
+
+[node name="HowButton" type="Button" parent="MenuLayer/Scroll/Center/Page/MenuRow/MenuContent/MenuButtons" unique_id=1681513427]
 theme_override_colors/font_disabled_color = Color(0.48, 0.42, 0.53, 1)
-custom_minimum_size = Vector2(350, 58)
+custom_minimum_size = Vector2(370, 66)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2235, 0.1255, 0.3725, 1)
 theme_override_colors/font_pressed_color = Color(0.2235, 0.1255, 0.3725, 1)
 theme_override_colors/font_hover_color = Color(0.2235, 0.1255, 0.3725, 1)
-theme_override_font_sizes/font_size = 19
-theme_override_styles/normal = SubResource("UISecondary")
-theme_override_styles/pressed = SubResource("UISecondaryHover")
-theme_override_styles/hover = SubResource("UISecondaryHover")
-theme_override_styles/disabled = SubResource("UIDisabled")
-theme_override_styles/focus = SubResource("StyleBoxFlat_5gulm")
-text = "?  Como jogar"
+theme_override_fonts/font = ExtResource("41_menu_font")
+theme_override_font_sizes/font_size = 23
+theme_override_styles/normal = SubResource("MenuButtonClear")
+theme_override_styles/pressed = SubResource("MenuButtonClear")
+theme_override_styles/hover = SubResource("MenuButtonClear")
+theme_override_styles/disabled = SubResource("MenuButtonClear")
+theme_override_styles/focus = SubResource("MenuButtonFocus")
+text = "Como jogar"
 size_flags_horizontal = 0
 
+[node name="MenuButtonArt" type="TextureRect" parent="MenuLayer/Scroll/Center/Page/MenuRow/MenuContent/MenuButtons/HowButton"]
+show_behind_parent = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = SubResource("MenuButtonHowArt")
+expand_mode = 1
+stretch_mode = 0
+mouse_filter = 2
 
-[node name="ExitButton" type="Button" parent="MenuLayer/Scroll/Center/Page/MenuRow/MenuContent" unique_id=349170954]
+
+[node name="ExitButton" type="Button" parent="MenuLayer/Scroll/Center/Page/MenuRow/MenuContent/MenuButtons" unique_id=349170954]
 theme_override_colors/font_disabled_color = Color(0.48, 0.42, 0.53, 1)
-custom_minimum_size = Vector2(350, 58)
+custom_minimum_size = Vector2(370, 66)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2235, 0.1255, 0.3725, 1)
 theme_override_colors/font_pressed_color = Color(0.2235, 0.1255, 0.3725, 1)
 theme_override_colors/font_hover_color = Color(0.2235, 0.1255, 0.3725, 1)
-theme_override_font_sizes/font_size = 19
-theme_override_styles/normal = SubResource("UISecondary")
-theme_override_styles/pressed = SubResource("UISecondaryHover")
-theme_override_styles/hover = SubResource("UISecondaryHover")
-theme_override_styles/disabled = SubResource("UIDisabled")
-theme_override_styles/focus = SubResource("StyleBoxFlat_wi4kj")
+theme_override_fonts/font = ExtResource("41_menu_font")
+theme_override_font_sizes/font_size = 23
+theme_override_styles/normal = SubResource("MenuButtonClear")
+theme_override_styles/pressed = SubResource("MenuButtonClear")
+theme_override_styles/hover = SubResource("MenuButtonClear")
+theme_override_styles/disabled = SubResource("MenuButtonClear")
+theme_override_styles/focus = SubResource("MenuButtonFocus")
 text = "Sair"
 size_flags_horizontal = 0
+
+[node name="MenuButtonArt" type="TextureRect" parent="MenuLayer/Scroll/Center/Page/MenuRow/MenuContent/MenuButtons/ExitButton"]
+show_behind_parent = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = SubResource("MenuButtonExitArt")
+expand_mode = 1
+stretch_mode = 0
+mouse_filter = 2
 
 
 [node name="DemoTag" type="Label" parent="MenuLayer/Scroll/Center/Page/MenuRow/MenuContent" unique_id=722320054]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.98039216, 0.9411765, 1)
+theme_override_fonts/font = ExtResource("42_menu_font_regular")
 theme_override_font_sizes/font_size = 14
+custom_minimum_size = Vector2(448, 44)
+size_flags_horizontal = 0
 text = "Modo de teste · seu progresso não será salvo."
+horizontal_alignment = 1
+vertical_alignment = 1
 autowrap_mode = 3
+
+[node name="DemoTagFrame" type="TextureRect" parent="MenuLayer/Scroll/Center/Page/MenuRow/MenuContent/DemoTag"]
+show_behind_parent = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("36_menu_footer")
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
 
 [node name="CatSpace" type="Control" parent="MenuLayer/Scroll/Center/Page/MenuRow"]
 custom_minimum_size = Vector2(220, 420)
@@ -2500,10 +2669,11 @@ offset_top = -190.0
 offset_right = 225.0
 offset_bottom = 10.0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("MagicSpeechLarge")
+theme_override_styles/panel = SubResource("MagicSpeechWalk")
 
 [node name="WalkSpeechLabel" type="Label" parent="MenuLayer/MenuCat/CatWalkRig/WalkSpeech"]
 layout_mode = 2
+theme_override_constants/line_spacing = 1
 theme_override_colors/font_color = Color(0.12941177, 0.09019608, 0.21568628, 1)
 theme_override_font_sizes/font_size = 18
 text = "Hora de representar!!!"
@@ -2582,6 +2752,7 @@ layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 horizontal_scroll_mode = 0
+vertical_scroll_mode = 4
 
 [node name="Center" type="CenterContainer" parent="GameLayer/Scroll" unique_id=553178168]
 layout_mode = 2
@@ -2639,7 +2810,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 0.98039216, 0.9411765, 1)
 theme_override_font_sizes/font_size = 24
-text = "Vamos descobrir frações!"
+text = "Vamos descobrir mais frações!"
 autowrap_mode = 3
 
 [node name="ProgressRow" type="BoxContainer" parent="GameLayer/Scroll/Center/Page/GameRow/GameCard/GameContent" unique_id=1120734604]

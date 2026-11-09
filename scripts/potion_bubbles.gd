@@ -12,10 +12,10 @@ func _draw() -> void:
 		return
 	# The bubbling becomes denser and faster while the potion rises.
 	var pressure := smoothstep(0.45, 2.2, time)
-	var liquid_top := lerpf(178.0, 159.0, smoothstep(0.72, 2.43, time))
+	var liquid_top := lerpf(178.0, 159.0, smoothstep(0.72, 1.65, time))
 	for index in 12:
 		var phase := fposmod(time * (0.8 + pressure * 0.9 + index % 4 * 0.12) + index * 0.137, 1.0)
-		var point := Vector2(94 + (index * 11) % 42, 181 - phase * (181.0 - liquid_top))
+		var point := Vector2(90 + (index * 11) % 49, 205 - phase * (205.0 - liquid_top))
 		var radius := (1.1 + index % 4 * 0.48) * (0.7 + pressure * 0.5)
 		var alpha := strength * sin(phase * PI)
 		draw_circle(point, radius, Color("e5a8ff", alpha * 0.3), true, -1, true)

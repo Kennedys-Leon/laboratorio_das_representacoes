@@ -137,7 +137,7 @@ func apply_visuals() -> void:
 	for node in fonts:
 		if not is_instance_valid(node): continue
 		var base: int = fonts[node]
-		if node.name == "MenuTitle": base = 34 if game.size.x < 900 else 53
+		if node.name == "MenuTitle" or node.name == "MenuTitleShadow": base = 34 if game.size.x < 900 else 49
 		node.add_theme_font_size_override("font_size", roundi(base * profile.textScale))
 		for key in styles[node]: node.set(key, styles[node][key])
 		for key in colors[node]: node.set(key, colors[node][key])
@@ -156,7 +156,7 @@ func apply_visuals() -> void:
 				node.add_theme_color_override(key, Color.WHITE)
 		if node is Label: node.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if large else wrap_modes[node]
 		if node is Button:
-			node.custom_minimum_size.y = maxf(48, 32 * profile.textScale)
+			node.custom_minimum_size.y = maxf(node.custom_minimum_size.y, maxf(48, 32 * profile.textScale))
 			node.add_theme_color_override("font_focus_color", Color.WHITE if high else colors[node]["theme_override_colors/font_color"])
 			var focus := StyleBoxFlat.new()
 			focus.bg_color = Color.TRANSPARENT
@@ -165,6 +165,7 @@ func apply_visuals() -> void:
 			node.add_theme_stylebox_override("focus", focus)
 			node.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			node.accessibility_name = node.text
+	game.find_child("MenuTitleShadow", true, false).visible = not high
 	for n in ["MenuDecor", "GameDecor", "HowDecor", "FeedbackDecor"]:
 		var decor: Control = game.find_child(n,true,false)
 		decor.visible = not profile.focusMode and (n != "HowDecor" or text_instructions)

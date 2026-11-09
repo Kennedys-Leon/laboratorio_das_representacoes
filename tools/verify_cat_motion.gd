@@ -62,12 +62,11 @@ func verify() -> void:
 				backward_lean_samples += 1
 			last_body_pose = body_pose
 			var feet: Array[Vector2] = cat.walk_rig.call("foot_positions")
-			assert(absf(feet[1].x - feet[0].x) <= 34.1,
+			assert(absf(feet[1].x - feet[0].x) <= 31.0 + cat.walk_rig.STEP_LENGTH + 0.1,
 				"The paws spread too far apart during a stride")
 			if cat.walk_distance > cat.walk_rig.FIRST_STEP:
 				for paw in 2:
-					var stance_offset := 2.5 if paw == 0 else -2.5
-					assert(absf(feet[paw].x - cat.walk_rig.BIND_FEET[paw].x - stance_offset) < 8.0,
+					assert(absf(feet[paw].x - cat.walk_rig.BIND_FEET[paw].x) < 7.0,
 						"One paw trails its hip by more than the balanced stride")
 			var ground_y := (cat.get_global_transform() * (cat.home_position + Vector2(0, 150))).y
 			var grounded := [false, false]
@@ -99,6 +98,15 @@ func verify() -> void:
 	assert(scene.get("game_layer").visible, "Round did not open")
 	assert(not walk_speech.visible and not walk_speech_tail.visible,
 		"Walking bubble remains after the cat leaves")
+	# Each leg must have the same reach/lift relative to its own ankle, shifted
+	# by one step. This catches the former permanent forward/backward bias.
+	for sample in 240:
+		var distance: float = cat.walk_rig.FIRST_STEP + 2.0 * cat.walk_rig.STEP_LENGTH + sample * cat.walk_rig.STEP_LENGTH / 120.0
+		cat.walk_rig.distance = distance
+		var far: Vector2 = cat.walk_rig.foot_positions()[0] - cat.walk_rig.BIND_FEET[0]
+		cat.walk_rig.distance = distance + cat.walk_rig.STEP_LENGTH
+		var near: Vector2 = cat.walk_rig.foot_positions()[1] - cat.walk_rig.BIND_FEET[1]
+		assert(far.distance_to(near) < 0.001, "The two legs have unequal stride trajectories")
 	scene.call("_show_layer", "menu")
 	assert(root.gui_get_focus_owner() == null, "Play button kept the purple focus outline after returning")
 	scene.find_child("HowButton", true, false).pressed.emit()

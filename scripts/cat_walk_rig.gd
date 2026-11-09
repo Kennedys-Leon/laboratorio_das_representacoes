@@ -5,13 +5,14 @@ extends Node2D
 const ART: Texture2D = preload("res://assets/cat_animation/v8/standing.png")
 const GROUND_Y := 150.0
 const STEP_LENGTH := 8.0
-const FIRST_STEP := STEP_LENGTH
-const FIRST_SWING := STEP_LENGTH * 2.0 - 3.0
-const DOUBLE_SUPPORT := 0.20
-const LIFT := 3.3
+# A half-length start brings both ankles into the same symmetric gait.
+const FIRST_STEP := STEP_LENGTH * 0.5
+const FIRST_SWING := STEP_LENGTH
+const DOUBLE_SUPPORT := 0.16
+const LIFT := 3.8
 const BODY_PIVOT := Vector2(70, 129)
-const BODY_BOB := 1.05
-const BODY_LEAN := 0.9
+const BODY_BOB := 0.95
+const BODY_LEAN := 0.7
 const BODY_SWAY := 0.22
 const BIND_FEET := [Vector2(54, GROUND_Y), Vector2(85, GROUND_Y)]
 const HIPS := [Vector2(53, 130), Vector2(81, 129)]
@@ -21,7 +22,7 @@ var fur_colors: Array[Color] = []
 const BODY := [Vector2(0, 0), Vector2(128, 0), Vector2(128, 131),
 	Vector2(93, 131), Vector2(86, 133), Vector2(82, 130), Vector2(72, 131),
 	Vector2(68, 134), Vector2(64, 135), Vector2(55, 134), Vector2(49, 132),
-	Vector2(45, 134), Vector2(45, 152), Vector2(0, 152)]
+	Vector2(45, 134), Vector2(0, 134)]
 const FAR_LEG := [Vector2(44, 134), Vector2(68, 134), Vector2(71, 138),
 	Vector2(71, 152), Vector2(44, 152)]
 const NEAR_LEG := [Vector2(70, 134), Vector2(91, 134), Vector2(105, 142),
@@ -55,10 +56,9 @@ func begin_walk() -> void:
 func foot_positions() -> Array[Vector2]:
 	if not walking:
 		return pose_feet
-	# Each paw advances from its own authored ankle. The old first stride
-	# used the other ankle as its destination and overextended the far thigh.
-	# Start with a half stride. A full first stride left the right paw a
-	# whole step behind its hip, while the left paw stayed ahead of its hip.
+	# The first swing travels one step while the body advances half a step.
+	# Thereafter each swing travels two steps. Both paws therefore share
+	# the same reach around their own hip, half a cycle apart.
 	var starting := distance < FIRST_STEP
 	var travel := maxf(0.0, distance - FIRST_STEP)
 	var step := int(floor(travel / STEP_LENGTH))
