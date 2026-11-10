@@ -24,10 +24,12 @@ float lower_edge(float x) {
 
 void vertex() {
 	local_pixel = VERTEX;
-	// Gentle expansion about the ground line: roughly 1.6 px at the ears.
+	// A visible inhale while the seated paws remain fixed on the floor.
 	// The feet stay at y=150, instead of lifting the entire sprite off the floor.
 	float height_above_floor = max(150.0 - VERTEX.y, 0.0);
-	VERTEX.y -= height_above_floor * (1.8 / 150.0) * breath_amount;
+	float chest = clamp((150.0 - VERTEX.y) / 105.0, 0.0, 1.0);
+	VERTEX.y -= height_above_floor * (2.7 / 150.0) * breath_amount;
+	VERTEX.x += (VERTEX.x - 64.0) * chest * 0.011 * breath_amount;
 }
 
 void fragment() {

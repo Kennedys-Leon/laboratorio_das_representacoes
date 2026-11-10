@@ -9,9 +9,10 @@ const TURN_ATLAS: Texture2D = preload("res://assets/cat_animation/v8/turn-60.png
 const TURN_FRAME_COUNT := 60
 const TURN_FPS := 60.0
 const TURN_SECONDS := 1.0
-const WALK_SPEED := 32.0
-const WALK_ACCELERATION_SECONDS := 0.22
-const WALK_SECONDS := 2.6
+const WALK_SECONDS := 3.0
+const WALK_RAMP_SECONDS := 0.24
+# Stop on a double-support pose, with the cat still on screen when the scene changes.
+var walk_route_distance := 140.0
 
 @onready var sprite: TextureRect = $CatSprite
 @onready var shadow: Panel = $CatShadow
@@ -23,7 +24,6 @@ var frame_index := 0
 var elapsed := 0.0
 var home_position := Vector2(46, 0)
 var shadow_home_position := Vector2(55, 140)
-var walk_target_x := 0.0
 var walk_distance := 0.0
 var reduced_motion := false
 var turn_start_position := Vector2.ZERO
@@ -60,10 +60,10 @@ func _process(delta: float) -> void:
 
 func _animate_idle() -> void:
 	# A smooth full breathing cycle, with the feet anchored to the floor.
-	breath_amount = 0.5 - 0.5 * cos(elapsed * TAU / 2.7)
+	breath_amount = 0.5 - 0.5 * cos(elapsed * TAU / 2.5)
 	(sprite.material as ShaderMaterial).set_shader_parameter("breath_amount", breath_amount)
 	sprite.position = home_position
-	sprite.rotation = deg_to_rad(sin(elapsed * TAU / 4.6) * 0.35)
+	sprite.rotation = deg_to_rad(sin(elapsed * TAU / 4.4) * 0.48)
 
 
 func _animate_turn() -> void:
@@ -82,19 +82,28 @@ func _animate_turn() -> void:
 
 
 func _animate_walk() -> void:
-	# Integrate a short acceleration ramp, then maintain a steady walking speed.
-	var ramp := WALK_ACCELERATION_SECONDS
-	if elapsed < ramp:
-		var u := elapsed / ramp
-		walk_distance = WALK_SPEED * ramp * (u * u * u - 0.5 * u * u * u * u)
+	# Integrate symmetric acceleration and braking. The paws are driven by the
+	# distance travelled, so neither foot slides while it supports the body.
+	var time := clampf(elapsed, 0.0, WALK_SECONDS)
+	var ramp := WALK_RAMP_SECONDS
+	var speed := walk_route_distance / (WALK_SECONDS - ramp)
+	if time < ramp:
+		var u := time / ramp
+		walk_distance = speed * ramp * (u * u * u - 0.5 * u * u * u * u)
+	elif time > WALK_SECONDS - ramp:
+		var u := (WALK_SECONDS - time) / ramp
+		walk_distance = walk_route_distance - speed * ramp * (u * u * u - 0.5 * u * u * u * u)
 	else:
-		walk_distance = WALK_SPEED * (elapsed - ramp * 0.5)
+		walk_distance = speed * (time - ramp * 0.5)
 	walk_rig.position = home_position + Vector2(walk_distance, 0)
 	walk_rig.set("distance", walk_distance)
 	shadow.position.x = shadow_home_position.x + walk_distance
-	modulate.a = 1.0 - smoothstep(WALK_SECONDS - 0.22, WALK_SECONDS, elapsed)
-	# The step phase is tied to distance, so the support foot stays fixed on the floor.
-	if walk_rig.position.x >= walk_target_x or elapsed >= WALK_SECONDS:
+	# Let the bubble follow the first steps, then fade it before its edge reaches
+	# the viewport. Moving the bubble independently detached its tail from the cat.
+	var bubble: TextureRect = $CatWalkRig/WalkSpeech
+	var clearance := get_viewport_rect().end.x - bubble.get_global_rect().end.x
+	bubble.modulate.a = smoothstep(0.0, 0.18, elapsed) * smoothstep(2.0, 25.0, clearance)
+	if elapsed >= WALK_SECONDS:
 		state = "stopped"
 		walk_finished.emit()
 
@@ -160,6 +169,8 @@ func _begin_walk(carry_time := 0.0) -> void:
 	walk_rig.modulate.a = 1.0
 	paw_overlay.hide()
 	walk_rig.show()
+	var edge := (get_global_transform_with_canvas().affine_inverse() * get_viewport_rect().end).x
+	var desired := maxf(40.0, edge - home_position.x - 105.0)
+	walk_route_distance = walk_rig.FIRST_STEP + roundf((desired - walk_rig.FIRST_STEP) / walk_rig.STEP_LENGTH) * walk_rig.STEP_LENGTH
 	walk_started.emit()
-	walk_target_x = (get_global_transform_with_canvas().affine_inverse() * Vector2(get_viewport_rect().end.x + 4.0, 0.0)).x
 	_animate_walk()

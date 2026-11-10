@@ -33,6 +33,7 @@
 [ext_resource type="Texture2D" path="res://assets/instrucoes-laboratorio.png" id="27_how_art"]
 [ext_resource type="Script" path="res://scripts/how_art_scene.gd" id="28_how_scene"]
 [ext_resource type="Shader" path="res://shaders/how_floor_blur.gdshader" id="29_how_floor_blur"]
+[ext_resource type="Shader" path="res://shaders/cat_how_breath.gdshader" id="40_how_cat_breath"]
 [ext_resource type="Texture2D" path="res://assets/pergaminho-fracoes.png" id="30_parchment"]
 [ext_resource type="Texture2D" path="res://assets/balao-fala-magico.png" id="31_magic_speech"]
 [ext_resource type="Texture2D" path="res://assets/ui_decor/menu-ribbon-ornate.png" id="32_menu_ribbon"]
@@ -98,6 +99,9 @@ content_margin_bottom = 43.0
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_how_floor_blur"]
 shader = ExtResource("29_how_floor_blur")
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_how_cat_breath"]
+shader = ExtResource("40_how_cat_breath")
+
 [sub_resource type="AtlasTexture" id="ParchmentFrame"]
 atlas = ExtResource("30_parchment")
 region = Rect2(8, 91, 1238, 1132)
@@ -110,7 +114,7 @@ content_margin_right = 30.0
 content_margin_bottom = 42.0
 
 [sub_resource type="StyleBoxEmpty" id="ParchmentHeader"]
-content_margin_left = 12.0
+content_margin_left = 20.0
 content_margin_top = 0.0
 content_margin_right = 12.0
 content_margin_bottom = 10.0
@@ -2395,6 +2399,7 @@ horizontal_scroll_mode = 0
 [node name="Center" type="CenterContainer" parent="MenuLayer/Scroll" unique_id=451097694]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="Page" type="VBoxContainer" parent="MenuLayer/Scroll/Center" unique_id=2130315841]
 custom_minimum_size = Vector2(960, 700)
@@ -2480,9 +2485,9 @@ mouse_filter = 2
 
 [node name="TitleDivider" type="TextureRect" parent="MenuLayer/Scroll/Center/Page/MenuRow/MenuContent/TitleDividerRow"]
 offset_left = 60.0
-offset_top = -14.0
+offset_top = 0.0
 offset_right = 325.0
-offset_bottom = 24.0
+offset_bottom = 38.0
 texture = ExtResource("37_menu_divider")
 expand_mode = 1
 stretch_mode = 0
@@ -2661,7 +2666,7 @@ offset_bottom = 25.0
 mouse_filter = 2
 script = ExtResource("26_walk_speech_tail")
 
-[node name="WalkSpeech" type="PanelContainer" parent="MenuLayer/MenuCat/CatWalkRig"]
+[node name="WalkSpeech" type="TextureRect" parent="MenuLayer/MenuCat/CatWalkRig"]
 visible = false
 show_behind_parent = true
 offset_left = -45.0
@@ -2669,10 +2674,15 @@ offset_top = -190.0
 offset_right = 225.0
 offset_bottom = 10.0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("MagicSpeechWalk")
+texture = ExtResource("31_magic_speech")
+expand_mode = 1
+stretch_mode = 0
 
 [node name="WalkSpeechLabel" type="Label" parent="MenuLayer/MenuCat/CatWalkRig/WalkSpeech"]
-layout_mode = 2
+offset_left = 30.0
+offset_top = 55.0
+offset_right = 240.0
+offset_bottom = 158.0
 theme_override_constants/line_spacing = 1
 theme_override_colors/font_color = Color(0.12941177, 0.09019608, 0.21568628, 1)
 theme_override_font_sizes/font_size = 18
@@ -2757,6 +2767,7 @@ vertical_scroll_mode = 4
 [node name="Center" type="CenterContainer" parent="GameLayer/Scroll" unique_id=553178168]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="Page" type="VBoxContainer" parent="GameLayer/Scroll/Center" unique_id=742577915]
 custom_minimum_size = Vector2(960, 700)
@@ -2810,6 +2821,8 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 0.98039216, 0.9411765, 1)
 theme_override_font_sizes/font_size = 24
+horizontal_alignment = 0
+vertical_alignment = 1
 text = "Vamos descobrir mais frações!"
 autowrap_mode = 3
 
@@ -3351,6 +3364,7 @@ horizontal_scroll_mode = 0
 [node name="Center" type="CenterContainer" parent="FeedbackLayer/Scroll" unique_id=1971079210]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="Page" type="VBoxContainer" parent="FeedbackLayer/Scroll/Center" unique_id=1843728856]
 custom_minimum_size = Vector2(820, 700)
@@ -3460,6 +3474,7 @@ material = SubResource("ShaderMaterial_how_floor_blur")
 mouse_filter = 2
 
 [node name="HowCat" type="TextureRect" parent="HowLayer/HowArtLayer"]
+material = SubResource("ShaderMaterial_how_cat_breath")
 offset_left = 888.0
 offset_top = 404.0
 offset_right = 1006.0

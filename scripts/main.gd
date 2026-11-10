@@ -25,7 +25,7 @@ const MENU_GREETINGS := [
 @onready var menu_speech_label: Label = find_child("MenuSpeechLabel", true, false)
 @onready var menu_speech_tail: Control = find_child("MenuSpeechTail", true, false)
 @onready var menu_speech_pop: SpeechPop = find_child("MenuSpeechPop", true, false)
-@onready var walk_speech: PanelContainer = find_child("WalkSpeech", true, false)
+@onready var walk_speech: TextureRect = find_child("WalkSpeech", true, false)
 @onready var walk_speech_tail: Control = find_child("WalkSpeechTail", true, false)
 @onready var game_cat: GameCatIdle = find_child("GameCat", true, false)
 @onready var game_row: BoxContainer = find_child("GameRow", true, false)
@@ -194,7 +194,7 @@ func _align_menu_greeting() -> void:
 	await get_tree().process_frame
 	var center := 120.0
 	menu_speech.size = Vector2(360, maxf(230, menu_speech.get_combined_minimum_size().y))
-	menu_speech.position = Vector2(center - menu_speech.size.x * MENU_SPEECH_SCALE.x * 0.5, -24.0 - menu_speech.size.y * MENU_SPEECH_SCALE.y)
+	menu_speech.position = Vector2(center - menu_speech.size.x * MENU_SPEECH_SCALE.x * 0.5, 30.0 - menu_speech.size.y * MENU_SPEECH_SCALE.y)
 	menu_speech_tail.size = Vector2(48, 32)
 	menu_speech_tail.position = Vector2(center + 8, menu_speech.position.y + menu_speech.size.y * MENU_SPEECH_SCALE.y - 1.5)
 	menu_speech_tail.set("curved", true)
@@ -224,10 +224,10 @@ func _show_walk_speech() -> void:
 	walk_speech_tail.hide()
 	walk_speech.modulate.a = 0.0
 	walk_speech_tail.modulate.a = 0.0
-	walk_speech.scale = Vector2(0.92, 0.92)
+	var bubble_scale := clampf(get_viewport_rect().size.x / 1100.0, 0.76, 1.0)
+	walk_speech.scale = Vector2.ONE * bubble_scale * 0.92
 	walk_speech_tween = create_tween().set_parallel(true)
-	walk_speech_tween.tween_property(walk_speech, "modulate:a", 1.0, 0.22)
-	walk_speech_tween.tween_property(walk_speech, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	walk_speech_tween.tween_property(walk_speech, "scale", Vector2.ONE * bubble_scale, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	walk_speech_tween.tween_property(walk_speech_tail, "modulate:a", 1.0, 0.22)
 
 
@@ -263,7 +263,7 @@ func _update_layout() -> void:
 	eyebrow_ribbon.offset_top = -32.0 if narrow else -40.0
 	eyebrow_ribbon.offset_bottom = 32.0 if narrow else 40.0
 	var title_divider: TextureRect = find_child("TitleDivider", true, false)
-	title_divider.offset_left = 25.0 if narrow else 60.0
+	title_divider.offset_left = 25.0 if narrow else 80.0
 	title_divider.offset_right = title_divider.offset_left + (minf(240.0, width - 40.0) if narrow else 265.0)
 	find_child("DemoTag", true, false).custom_minimum_size.x = minf(448.0, width - 24.0)
 	var title: Label = find_child("MenuTitle", true, false)

@@ -14,8 +14,11 @@ func verify() -> void:
 	var cat: CatAnimator = scene.find_child("MenuCat", true, false)
 	cat.set_process(false)
 	await process_frame
+	cat._process(1.25)
+	assert(cat.breath_amount > 0.95, "Menu cat's breathing is no longer visible")
+	cat.start_idle()
 	var play: Button = scene.find_child("PlayButton", true, false)
-	var walk_speech: PanelContainer = scene.find_child("WalkSpeech", true, false)
+	var walk_speech: TextureRect = scene.find_child("WalkSpeech", true, false)
 	var walk_speech_tail: Control = scene.find_child("WalkSpeechTail", true, false)
 	assert(walk_speech.get_parent() == cat.walk_rig and walk_speech_tail.get_parent() == cat.walk_rig,
 		"Walking bubble does not follow the cat")
@@ -26,6 +29,7 @@ func verify() -> void:
 	play.pressed.emit()
 	var turn_seen := {}
 	var support_samples := 0
+	var walk_samples := 0
 	var both_down_samples := 0
 	var lifted := [0, 0]
 	var last_world: Array[Vector2] = []
@@ -48,25 +52,31 @@ func verify() -> void:
 					assert(absf(turn_feet[paw].x - last_turn_feet[paw].x) < 1.0, "Rising paw jumped")
 			last_turn_feet = turn_feet
 		elif cat.state == "walk":
+			walk_samples += 1
+			assert(cat.modulate.a > 0.999, "Cat faded out before the scene transition")
 			assert(walk_speech.visible and not walk_speech_tail.visible,
 				"Walking bubble did not appear with the first step")
+			assert(walk_speech.size.y <= 201.0, "Walking bubble grew over the cat")
+			if walk_speech.modulate.a > 0.05:
+				assert(walk_speech.get_global_rect().end.x <= root.size.x + 3.0,
+					"Walking bubble clipped at the screen edge")
 			assert(not cat.paw_overlay.visible, "Rising paw layer remained over the walk")
 			var body_pose: Vector2 = cat.walk_rig.call("body_pose")
 			assert(absf(body_pose.x - last_body_pose.x) < 0.5,
 				"Upper body jumped out of step with the paws")
 			assert(absf(body_pose.y - last_body_pose.y) < deg_to_rad(0.6),
 				"Upper body lean jumped between steps")
-			if body_pose.y > deg_to_rad(0.2):
+			if body_pose.y > deg_to_rad(0.08):
 				forward_lean_samples += 1
-			elif body_pose.y < -deg_to_rad(0.2):
+			elif body_pose.y < -deg_to_rad(0.08):
 				backward_lean_samples += 1
 			last_body_pose = body_pose
 			var feet: Array[Vector2] = cat.walk_rig.call("foot_positions")
 			assert(absf(feet[1].x - feet[0].x) <= 31.0 + cat.walk_rig.STEP_LENGTH + 0.1,
 				"The paws spread too far apart during a stride")
-			if cat.walk_distance > cat.walk_rig.FIRST_STEP:
+			if cat.walk_distance > cat.walk_rig.FIRST_STEP + cat.walk_rig.STEP_LENGTH:
 				for paw in 2:
-					assert(absf(feet[paw].x - cat.walk_rig.BIND_FEET[paw].x) < 7.0,
+					assert(absf(feet[paw].x - cat.walk_rig.GAIT_FEET[paw].x) < cat.walk_rig.STEP_LENGTH * 0.75,
 						"One paw trails its hip by more than the balanced stride")
 			var ground_y := (cat.get_global_transform() * (cat.home_position + Vector2(0, 150))).y
 			var grounded := [false, false]
@@ -91,6 +101,8 @@ func verify() -> void:
 			break
 		cat._process(1.0 / 60.0)
 	assert(turn_seen.size() == 60, "Turn did not display all 60 frames")
+	assert(walk_samples <= 181 and walk_samples >= 179, "Walk takes too long or skips its steps")
+	assert(is_equal_approx(cat.walk_distance, cat.walk_route_distance), "Walk ended before the planted final pose")
 	assert(both_down_samples > 20, "Missing double support")
 	assert(lifted[0] > 20 and lifted[1] > 20, "Both legs must take turns stepping")
 	assert(forward_lean_samples > 15 and backward_lean_samples > 15,
@@ -103,14 +115,18 @@ func verify() -> void:
 	for sample in 240:
 		var distance: float = cat.walk_rig.FIRST_STEP + 2.0 * cat.walk_rig.STEP_LENGTH + sample * cat.walk_rig.STEP_LENGTH / 120.0
 		cat.walk_rig.distance = distance
-		var far: Vector2 = cat.walk_rig.foot_positions()[0] - cat.walk_rig.BIND_FEET[0]
+		var far: Vector2 = cat.walk_rig.foot_positions()[0] - cat.walk_rig.GAIT_FEET[0]
 		cat.walk_rig.distance = distance + cat.walk_rig.STEP_LENGTH
-		var near: Vector2 = cat.walk_rig.foot_positions()[1] - cat.walk_rig.BIND_FEET[1]
+		var near: Vector2 = cat.walk_rig.foot_positions()[1] - cat.walk_rig.GAIT_FEET[1]
 		assert(far.distance_to(near) < 0.001, "The two legs have unequal stride trajectories")
 	scene.call("_show_layer", "menu")
 	assert(root.gui_get_focus_owner() == null, "Play button kept the purple focus outline after returning")
 	scene.find_child("HowButton", true, false).pressed.emit()
 	assert(scene.get("current_layer") == "how" and root.gui_get_focus_owner() == null,
 		"Rules button kept a purple focus outline")
-	print("PASS: 60 turn frames, constant scale, %s grounded samples, %s double-support samples, upper body follows both strides, no foot sliding, game opens" % [support_samples, both_down_samples])
+	var how_art: Control = scene.find_child("HowArtLayer", true, false)
+	how_art._process(1.25)
+	assert(float((scene.find_child("HowCat", true, false).material as ShaderMaterial).get_shader_parameter("breath_amount")) > 0.95,
+		"The cat on the rules screen is motionless")
+	print("PASS: 60 turn frames, %s walking frames, visible cat, %s grounded samples, %s double-support samples, synchronized body and paws, both idle screens breathe" % [walk_samples, support_samples, both_down_samples])
 	quit()

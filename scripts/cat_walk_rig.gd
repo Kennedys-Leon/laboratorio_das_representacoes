@@ -4,17 +4,18 @@ extends Node2D
 
 const ART: Texture2D = preload("res://assets/cat_animation/v8/standing.png")
 const GROUND_Y := 150.0
-const STEP_LENGTH := 8.0
+const STEP_LENGTH := 12.0
 # A half-length start brings both ankles into the same symmetric gait.
 const FIRST_STEP := STEP_LENGTH * 0.5
 const FIRST_SWING := STEP_LENGTH
-const DOUBLE_SUPPORT := 0.16
-const LIFT := 3.8
+const DOUBLE_SUPPORT := 0.11
+const LIFT := 1.7
 const BODY_PIVOT := Vector2(70, 129)
-const BODY_BOB := 0.95
-const BODY_LEAN := 0.7
+const BODY_BOB := 0.28
+const BODY_LEAN := 0.70
 const BODY_SWAY := 0.22
 const BIND_FEET := [Vector2(54, GROUND_Y), Vector2(85, GROUND_Y)]
+const GAIT_FEET := [Vector2(59, GROUND_Y), Vector2(80, GROUND_Y)]
 const HIPS := [Vector2(53, 130), Vector2(81, 129)]
 var fur_colors: Array[Color] = []
 # The body keeps the coat hem. The foot polygons start below it, so a white
@@ -77,6 +78,10 @@ func foot_positions() -> Array[Vector2]:
 		if leg == moving:
 			world_x += ease * (FIRST_SWING if starting else 2.0 * STEP_LENGTH)
 			lift = LIFT * (0.75 if starting else 1.0) * pow(sin(swing * PI), 2)
+		# Bring each paw under the hip during its first swing, never sliding a planted foot.
+		var settled := not starting if leg == 0 else step > 0
+		var narrow_blend := 1.0 if settled else (ease if leg == moving else 0.0)
+		world_x += (GAIT_FEET[leg].x - BIND_FEET[leg].x) * narrow_blend
 		feet.append(Vector2(world_x - distance, GROUND_Y - lift))
 	return feet
 
