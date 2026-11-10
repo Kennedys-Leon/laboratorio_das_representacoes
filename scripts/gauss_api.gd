@@ -9,6 +9,9 @@ var token := ""
 
 
 func _ready() -> void:
+	# Lesson credentials belong to the site host; this branch never reads a token.
+	if get_parent().get("lesson_mode") == true:
+		return
 	base_url = OS.get_environment("GAUSS_API_URL").strip_edges().trim_suffix("/")
 	token = OS.get_environment("GAUSS_STUDENT_TOKEN").strip_edges()
 	if OS.has_feature("web"):

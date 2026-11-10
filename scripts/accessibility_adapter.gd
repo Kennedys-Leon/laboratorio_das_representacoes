@@ -21,6 +21,12 @@ var loading := false
 
 func _ready() -> void:
 	game = get_parent()
+	if game.lesson_mode:
+		var balloon: StyleBox = game.cat_speech.get_theme_stylebox("panel").duplicate()
+		balloon.set_content_margin(SIDE_LEFT, 35)
+		balloon.set_content_margin(SIDE_RIGHT, 35)
+		balloon.set_content_margin(SIDE_BOTTOM, 74)
+		game.cat_speech.add_theme_stylebox_override("panel", balloon)
 	var content: VBoxContainer = game.find_child("GameContent", true, false)
 	instruction = Label.new()
 	instruction.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -45,8 +51,26 @@ func _ready() -> void:
 		if game.result_correct: game._advance_after_victory()
 		else: game._restart_after_failure())
 	_capture(game)
+	if game.lesson_mode:
+		# The complete official prompt is longer than the prototype's paint hint.
+		fonts[game.question_label] = 18
 	if OS.has_feature("web"):
-		JavaScriptBridge.eval(preload("res://scripts/accessibility_web_source.gd").SOURCE, true)
+		if game.lesson_mode:
+			# The host's React practice is the semantic alternative for official lessons.
+			JavaScriptBridge.eval("""(() => {
+ window.gaussAccess = {queue:[], actions:[], render:()=>{}};
+ addEventListener('message', e => {
+  if(e.origin===location.origin && e.source===parent && e.data?.version===1 && e.data.type==='gauss-accessibility-profile') window.gaussAccess.queue.push(JSON.stringify(e.data.profile));
+ });
+ parent.postMessage({type:'gauss-accessibility-ready'},location.origin);
+})();""", true)
+		else:
+			JavaScriptBridge.eval(preload("res://scripts/accessibility_web_source.gd").SOURCE, true)
+	if game.lesson_mode:
+		var safe := Profile.DEFAULTS.duplicate()
+		safe.reducedMotion = true
+		apply_profile(safe)
+		return
 	if game.api.has_session() or (OS.has_feature("web") and bool(JavaScriptBridge.eval("window.parent !== window", true))):
 		loading = true
 		game.play_button.disabled = true
@@ -186,12 +210,19 @@ func apply_visuals() -> void:
 	game.diagram.marked_color = Color("5520a0") if high else Color("aa77e8")
 	game.diagram.text_scale = profile.textScale
 	game.apples.text_scale = profile.textScale
-	game.apples.custom_minimum_size.y = 220 * profile.textScale
+	game.apples.custom_minimum_size.y = (260 if game.apples.official_mode else 220) * profile.textScale
 	game.diagram.queue_redraw()
 	game.apples.queue_redraw()
 	for timer in [game.victory_timer,game.retry_timer]: timer.wait_time = 6 if profile.pace == "extended" else 3
+	if game.lesson_mode and game.lesson_bridge != null:
+		game.lesson_bridge.update_layout()
 
 func schedule_continuation() -> void:
+	if game.lesson_mode:
+		game.victory_timer.stop()
+		game.retry_timer.stop()
+		continue_button.hide()
+		return
 	game.victory_timer.stop()
 	game.retry_timer.stop()
 	continue_button.visible = profile.pace == "untimed"
@@ -214,6 +245,10 @@ func set_paused(value: bool) -> void:
 
 func descriptors() -> Array:
 	var list: Array = []
+	if game.lesson_mode:
+		# Official lessons use the site's semantic React alternative. Their controls
+		# are part of the original Godot scene, owned by the lesson bridge.
+		return list
 	if game.current_layer != "game":
 		return [{"text":"Jogar", "action":"play", "index":0, "disabled":loading or game.transitioning_to_game}]
 	var data: Dictionary = game.rounds[game.round_index].round
@@ -246,6 +281,9 @@ func action(kind: String, index: int) -> void:
 		"menu": game._show_layer("menu")
 		"pause": set_paused(not game.activity_paused)
 		"continue":
+			if game.lesson_mode:
+				game._check()
+				return
 			if continue_button.visible: continue_button.pressed.emit()
 		_:
 			if game.current_layer != "game" or game.submitting or game.activity_paused: return
@@ -318,8 +356,8 @@ func _process(delta: float) -> void:
 	if not game.submitting: continue_button.hide()
 	refresh_controls()
 	if OS.has_feature("web"):
-		var active_token := str(JavaScriptBridge.eval("window.localStorage.getItem('gauss.student.session') || ''",true))
-		if active_token != game.api.token:
+		var active_token := "" if game.lesson_mode else str(JavaScriptBridge.eval("window.localStorage.getItem('gauss.student.session') || ''",true))
+		if not game.lesson_mode and active_token != game.api.token:
 			host_revision += 1
 			game.api.token = active_token
 			game.submitting = false

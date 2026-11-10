@@ -2,6 +2,7 @@
 extends Control
 
 signal selection_changed(count: int)
+signal official_changed
 
 @export_range(2, 12, 1) var equal_parts := 4:
 	set(value):
@@ -11,7 +12,7 @@ signal selection_changed(count: int)
 	set(value):
 		marked_parts = value
 		queue_redraw()
-@export_enum("circle", "square") var diagram_shape := "circle":
+@export_enum("circle", "square", "strip") var diagram_shape := "circle":
 	set(value):
 		diagram_shape = value
 		queue_redraw()
@@ -28,6 +29,43 @@ var selected_parts := PackedInt32Array()
 var selection_history: Array[PackedInt32Array] = []
 var hovered_part := -1
 var text_scale := 1.0
+## In an observation question the API marks are givens, never a pupil's answer.
+var observe_mode := false
+var official_instrument = null
+
+
+func configure_official(model: Dictionary, instrument: String) -> void:
+	if official_instrument == null:
+		official_instrument = preload("res://scripts/fraction_instruments.gd").new()
+	official_instrument.configure(model, instrument)
+	custom_minimum_size = Vector2(560, 250 if instrument in ["bread_share", "decimal", "comparison"] else 220)
+	queue_redraw()
+
+
+func clear_official() -> void:
+	official_instrument = null
+	queue_redraw()
+
+
+func official_state() -> Dictionary:
+	return official_instrument.snapshot() if official_instrument != null else {}
+
+
+func restore_official_state(value: Dictionary) -> void:
+	if official_instrument == null: return
+	official_instrument.restore(value)
+	queue_redraw()
+
+
+func official_controls() -> Array:
+	return official_instrument.controls() if official_instrument != null else []
+
+
+func official_action(id: String) -> void:
+	if official_instrument == null or not interactive: return
+	if official_instrument.action(id):
+		queue_redraw()
+		official_changed.emit()
 
 
 func reset_selection() -> void:
@@ -61,6 +99,13 @@ func select_part(part: int) -> void:
 func _gui_input(event: InputEvent) -> void:
 	if not interactive:
 		return
+	if official_instrument != null:
+		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			var id: String = official_instrument.hit(event.position)
+			if not id.is_empty():
+				official_action(id)
+				accept_event()
+		return
 	if event is InputEventMouseMotion:
 		var next_hover := _part_at(event.position)
 		if next_hover != hovered_part:
@@ -74,6 +119,10 @@ func _gui_input(event: InputEvent) -> void:
 
 
 func _part_at(point: Vector2) -> int:
+	if diagram_shape == "strip":
+		var strip := _strip_bounds()
+		if not strip.has_point(point): return -1
+		return mini(equal_parts - 1, int((point.x - strip.position.x) / strip.size.x * equal_parts))
 	var center := size / 2.0
 	var extent := minf(size.x, size.y) * 0.43
 	if diagram_shape == "square":
@@ -92,21 +141,47 @@ func _part_at(point: Vector2) -> int:
 
 
 func _draw() -> void:
+	if official_instrument != null:
+		official_instrument.render(self)
+		return
 	var center := size / 2.0
 	var extent := minf(size.x, size.y) * 0.43
 	if extent < 4.0:
 		return
-	if diagram_shape == "square":
+	if diagram_shape == "strip":
+		_draw_strip()
+	elif diagram_shape == "square":
 		_draw_square(center, extent)
 	else:
 		_draw_circle_parts(center, extent)
 
 
 func _part_color(part: int) -> Color:
-	var filled := selected_parts.has(part) if interactive else marked_parts.has(part)
+	var filled := selected_parts.has(part) if interactive and not observe_mode else marked_parts.has(part)
 	if filled:
 		return marked_color
 	return Color("edf8dc") if interactive and hovered_part == part else Color("fffdf1")
+
+
+func _strip_bounds() -> Rect2:
+	var dimensions := Vector2(size.x * 0.92, minf(size.y * 0.65, 115.0))
+	return Rect2((size - dimensions) / 2.0, dimensions)
+
+
+func _draw_strip() -> void:
+	var strip := _strip_bounds()
+	var outline := Color("241636")
+	for part in equal_parts:
+		var rect := Rect2(strip.position + Vector2(part * strip.size.x / equal_parts, 0), Vector2(strip.size.x / equal_parts, strip.size.y))
+		draw_rect(rect, _part_color(part))
+		# Hatching identifies the given mark without relying only on colour.
+		if marked_parts.has(part):
+			for line in 5:
+				var y := rect.position.y + 10.0 + line * (rect.size.y - 20.0) / 4.0
+				draw_line(Vector2(rect.position.x + 8, y), Vector2(rect.end.x - 8, y - 5), Color("44236b"), 1.6, true)
+		draw_rect(rect, outline, false, 2.5, true)
+		if selected_parts.has(part): draw_rect(rect.grow(-5), Color("a45b05"), false, 3.0, true)
+		draw_string(get_theme_default_font(), Vector2(rect.get_center().x - 5, strip.end.y + 24 * text_scale), str(part + 1), HORIZONTAL_ALIGNMENT_CENTER, -1, roundi(17 * text_scale), outline)
 
 
 func _draw_circle_parts(center: Vector2, radius: float) -> void:

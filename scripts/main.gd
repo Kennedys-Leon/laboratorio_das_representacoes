@@ -92,10 +92,15 @@ var parchment_card_style: StyleBox
 var parchment_header_style: StyleBox
 var mobile_card_style: StyleBoxFlat
 var mobile_header_style: StyleBoxFlat
+var lesson_mode := false
+var lesson_bridge: Node
 
 
 
 func _ready() -> void:
+	lesson_mode = OS.get_environment("GAUSS_LESSON_MODE") == "1"
+	if OS.has_feature("web"):
+		lesson_mode = bool(JavaScriptBridge.eval("new URLSearchParams(location.search).get('lesson') === '1'", true))
 	parchment_card_style = game_card.get_theme_stylebox("panel")
 	parchment_header_style = game_header.get_theme_stylebox("panel")
 	mobile_card_style = StyleBoxFlat.new()
@@ -151,6 +156,9 @@ func _ready() -> void:
 	_show_round()
 	accessibility = preload("res://scripts/accessibility_adapter.gd").new()
 	add_child(accessibility)
+	if lesson_mode:
+		lesson_bridge = preload("res://scripts/lesson_bridge.gd").new()
+		add_child(lesson_bridge)
 
 
 func _load_student_name() -> void:
@@ -313,6 +321,9 @@ func _update_layout() -> void:
 
 
 func _show_layer(name: String) -> void:
+	if lesson_mode and lesson_bridge != null and name == "menu":
+		lesson_bridge.exit_to_site()
+		return
 	if name != "game":
 		victory_timer.stop()
 		retry_timer.stop()
@@ -502,6 +513,7 @@ func _phase_for_exercise(lesson: Dictionary, exercise_id: String) -> String:
 
 
 func _active_choices() -> HFlowContainer:
+	if lesson_mode: return parts_choices
 	return parts_choices if rounds[round_index].round.kind == "fraction_parts" else collection_choices
 
 
@@ -528,6 +540,9 @@ func _answer_instruction(round_data: Dictionary) -> String:
 
 
 func _show_round() -> void:
+	if lesson_mode and lesson_bridge != null:
+		lesson_bridge.show_round()
+		return
 	if accessibility != null:
 		accessibility.selected_fruits.clear()
 		accessibility.set_paused(false)
@@ -602,6 +617,8 @@ func _update_steps() -> void:
 			step.add_theme_stylebox_override("panel",style)
 	find_child("StepDrawLabel", true, false).text = "✓  Pronto" if stage_complete else "1  Desenhe" if compact else "1  •  Pinte ou contorne"
 	find_child("StepAnswerLabel", true, false).text = "2  Responda" if compact else "2  •  Escolha a fração"
+	if lesson_mode:
+		find_child("StepDrawLabel", true, false).text = "1  •  Observe as partes"
 
 
 
@@ -700,6 +717,9 @@ func _finish_speech_open(generation: int) -> void:
 
 
 func _on_diagram_selection_changed(count: int) -> void:
+	if lesson_mode and lesson_bridge != null:
+		lesson_bridge.publish_draft()
+		return
 	if configuring_round or not diagram.visible:
 		return
 	var required: int = rounds[round_index].round.markedParts.size()
@@ -709,6 +729,7 @@ func _on_diagram_selection_changed(count: int) -> void:
 
 
 func _on_groups_changed(formed: int, required: int) -> void:
+	if lesson_mode: return
 	if configuring_round or not apples.visible:
 		return
 	_set_stage_complete(formed == required)
@@ -727,7 +748,7 @@ func _select(button: Button) -> void:
 	if selected_button != null:
 		_restore_choice(selected_button)
 	selected_button = button
-	button.text = "✓ " + str(button.get_meta("choice"))
+	button.text = ("[x] " if lesson_mode else "✓ ") + _choice_label(button.get_meta("choice"))
 	if old_choice != button.get_meta("choice"):
 		pending_attempt.clear()
 	var highlighted: StyleBoxFlat = base_styles[button].duplicate()
@@ -738,12 +759,20 @@ func _select(button: Button) -> void:
 	button.add_theme_color_override("font_color", INK)
 	check_button.disabled = false
 	status_label.text = "Você escolheu %s. Toque em Conferir." % button.text
+	if lesson_mode and lesson_bridge != null:
+		lesson_bridge.publish_draft()
 
 
 func _restore_choice(button: Button) -> void:
-	button.text = str(button.get_meta("choice",button.text))
+	button.text = _choice_label(button.get_meta("choice",button.text))
 	button.add_theme_stylebox_override("normal", base_styles[button])
 	button.add_theme_color_override("font_color", base_font_colors[button])
+
+
+func _choice_label(value: Variant) -> String:
+	if lesson_mode and typeof(value) == TYPE_FLOAT and is_equal_approx(float(value), roundf(float(value))):
+		return str(int(value))
+	return str(value)
 
 
 func _reset_selection() -> void:
@@ -758,6 +787,9 @@ func _reset_selection() -> void:
 
 
 func _repeat() -> void:
+	if lesson_mode and lesson_bridge != null:
+		lesson_bridge.reset()
+		return
 	if activity_paused: return
 	if accessibility != null: accessibility.selected_fruits.clear()
 	if not submitting:
@@ -765,6 +797,9 @@ func _repeat() -> void:
 
 
 func _undo() -> void:
+	if lesson_mode and lesson_bridge != null:
+		lesson_bridge.undo()
+		return
 	if activity_paused: return
 	if submitting:
 		return
@@ -778,6 +813,9 @@ func _undo() -> void:
 
 
 func _check() -> void:
+	if lesson_mode and lesson_bridge != null:
+		lesson_bridge.submit_answer()
+		return
 	if activity_paused or selected_button == null or submitting or not stage_complete:
 		return
 	var data: Dictionary = rounds[round_index]
@@ -874,6 +912,9 @@ func _new_event_id() -> String:
 
 
 func _on_celebration_finished() -> void:
+	if lesson_mode and lesson_bridge != null:
+		lesson_bridge.finish_animation()
+		return
 	if not result_correct or current_layer != "game":
 		return
 	check_button.hide()
@@ -889,6 +930,9 @@ func _advance_after_victory() -> void:
 
 
 func _on_failure_finished() -> void:
+	if lesson_mode and lesson_bridge != null:
+		lesson_bridge.finish_animation()
+		return
 	if current_layer != "game" or result_correct or not game_cat.failing:
 		return
 	retry_timer.start()

@@ -3,6 +3,7 @@ extends Control
 
 signal groups_changed(formed: int, required: int)
 signal group_rejected(message: String)
+signal official_changed
 
 const GROUP_COLORS := [Color("47ad72"), Color("9a62db"), Color("e7a72d"), Color("e7698b")]
 const APPLE_ART: Texture2D = preload("res://assets/fruta-maca-v2.png")
@@ -38,6 +39,8 @@ var rejected_path := PackedVector2Array()
 var rejected_time := 0.0
 var tray_style: StyleBoxFlat
 var text_scale := 1.0
+var official_mode := false
+var _official := preload("res://scripts/collection_instrument.gd").new()
 
 
 func _ready() -> void:
@@ -58,6 +61,9 @@ func _process(delta: float) -> void:
 
 
 func reset_groups() -> void:
+	if official_mode:
+		_official.reset()
+		return
 	groups.clear()
 	outlines.clear()
 	current_path.clear()
@@ -69,6 +75,9 @@ func reset_groups() -> void:
 
 
 func undo_last_group() -> void:
+	if official_mode:
+		_official.action("undo")
+		return
 	if groups.is_empty():
 		return
 	groups.pop_back()
@@ -78,6 +87,12 @@ func undo_last_group() -> void:
 
 
 func submit_lasso(path: PackedVector2Array) -> bool:
+	if official_mode:
+		if not interactive or path.size() < 3: return false
+		var indices := PackedInt32Array()
+		for index in _official.total:
+			if Geometry2D.is_point_in_polygon(_official.pool_center(self, index), path): indices.append(index)
+		return _official.assign_indices(indices)
 	if not interactive or groups.size() >= required_groups or path.size() < 3:
 		return false
 	var found := PackedInt32Array()
@@ -112,6 +127,8 @@ func _show_rejected(path: PackedVector2Array) -> void:
 
 
 func submit_indices(indices: PackedInt32Array) -> bool:
+	if official_mode:
+		return _official.assign_indices(indices) if interactive else false
 	if not interactive or groups.size() >= required_groups: return false
 	if indices.size() != group_size:
 		group_rejected.emit("Escolha %d frutas para formar este grupo." % group_size)
@@ -145,6 +162,11 @@ func _smooth_closed_path(path: PackedVector2Array) -> PackedVector2Array:
 
 
 func _gui_input(event: InputEvent) -> void:
+	if official_mode:
+		if interactive and event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			_official.point(self, event.position)
+			accept_event()
+		return
 	if not interactive or groups.size() >= required_groups:
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
@@ -172,6 +194,9 @@ func _fruit_center(index: int) -> Vector2:
 
 
 func _draw() -> void:
+	if official_mode:
+		_official.draw(self)
+		return
 	if columns < 1 or apple_count < 1:
 		return
 	if tray_style != null:
@@ -220,3 +245,38 @@ func _group_of(fruit_index: int) -> int:
 		if groups[index].has(fruit_index):
 			return index
 	return -1
+
+
+## Official lesson exploration uses the original tray. It never decides correctness.
+func clear_official() -> void:
+	official_mode = false
+	queue_redraw()
+
+
+func configure_official(model: Dictionary, instrument: String) -> void:
+	if not _official.changed.is_connected(_on_official_changed): _official.changed.connect(_on_official_changed)
+	official_mode = true
+	custom_minimum_size.y = 260 * text_scale
+	_official.configure(model, instrument)
+	queue_redraw()
+
+
+func official_state() -> Dictionary:
+	return _official.state()
+
+
+func restore_official_state(value: Dictionary) -> void:
+	_official.restore(value)
+
+
+func official_controls() -> Array:
+	return _official.controls()
+
+
+func official_action(id: String) -> void:
+	if interactive: _official.action(id)
+
+
+func _on_official_changed() -> void:
+	queue_redraw()
+	official_changed.emit()
